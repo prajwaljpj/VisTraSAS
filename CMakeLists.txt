@@ -15,6 +15,7 @@ add_subdirectory(${TRT_WRAPPER_DIR})
 include_directories(${TRT_WRAPPER_DIR}/include)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 #add opencv
 FIND_PACKAGE(OpenCV REQUIRED)
@@ -37,13 +38,13 @@ link_directories(${OpenCV_LIBRARIES_DIRS})
 
 
 #build runYolov3
-add_executable(runYolov3 main_infer.cpp inference.cpp eval.cpp dataReader.cpp)
+add_executable(runYolov3 ${SOURCE_DIR}/main_infer.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp)
 target_link_libraries(runYolov3 TrtNet ${OpenCV_LIBS})
 
 install(TARGETS runYolov3 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/)
 
 #build createEngine
-add_executable(createEngine main.cpp inference.cpp eval.cpp dataReader.cpp)
+add_executable(createEngine ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp)
 target_link_libraries(createEngine TrtNet ${OpenCV_LIBS})
 
 install(TARGETS createEngine DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/)

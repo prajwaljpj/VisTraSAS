@@ -1,32 +1,31 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <iterator>
 #include <boost/filesystem.hpp>
-#include <boost/iterator/filter_iterator.hpp>
+#include <boost/range.hpp>
+
 namespace fs = boost::filesystem;
 
-int main()
-{
-  fs::path p("toydata/");
-  fs::directory_iterator dir_first(p), dir_last;
-  std::vector<fs::path> files;
+std::string latestFile(std::string dirPath){
 
-  auto pred = [](const fs::directory_entry& p)
-	      {
-		return fs::is_regular_file(p);
-	      };
+  fs::path latest;
+  std::time_t latest_tm {};
 
-  std::copy(boost::make_filter_iterator(pred, dir_first, dir_last),
-	    boost::make_filter_iterator(pred, dir_last, dir_last),
-	    std::back_inserter(files)
-	    );
-
-  std::sort(files.begin(), files.end(),
-	    [](const fs::path& p1, const fs::path& p2)
-	    {
-	      return fs::last_write_time(p1) < fs::last_write_time(p2);
-	    });
-  std::cout << files[0] << std::endl;
-
+  for (auto&& entry : boost::make_iterator_range(fs::directory_iterator(dirPath), {})) {
+    fs::path p = entry.path();
+    if (is_regular_file(p) && p.extension() == ".flv") 
+      {
+	std::time_t timestamp = fs::last_write_time(p);
+	if (timestamp > latest_tm) {
+	  latest = p;
+	  latest_tm = timestamp;
+	}
+      }
+  }
+  if (latest.empty()){
+    std::cout << "Nothing found\n";
+    return "NOFILE";
+  }
+  else{
+    std::cout << "Last modified: " << latest << "\n";
+    return latest.string();
+  }
 }

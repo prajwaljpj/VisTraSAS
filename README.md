@@ -6,6 +6,8 @@ A complete system for the analysis of Indian Traffic Patterns
 Provides a novel approach to acquiring traffic counts and link speeds
 
 ## Installation
+dependencies: boost (sudo apt-get install libboost-all-dev)
+
 
 ### Creating model
 
