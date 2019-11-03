@@ -1,0 +1,3 @@
+[submodule "tensorRTWrapper"]
+	path = tensorRTWrapper
+	url = https://github.com/prajwaljpj/tensorRTWrapper

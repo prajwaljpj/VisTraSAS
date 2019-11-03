@@ -17,3 +17,4 @@ Provides a novel approach to acquiring traffic counts and link speeds
 
 ## Authors/Maintainers
 * Prajwal Rao - [prajwaljpj@gmail.com](mailto:prajwaljpj@gmail.com), [prajwalrao@iisc.ac.in](mailto:prajwalrao@iisc.ac.in)
+* Sadgun Srinivas - [sadgun.srinivas@gmail.com](mailto:sadgun.srinivas@gmail.com), [sadguns@iisc.ac.in](mailto:sadguns@iisc.ac.in)
