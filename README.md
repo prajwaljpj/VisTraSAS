@@ -7,7 +7,8 @@ Provides a novel approach to acquiring traffic counts and link speeds
 
 ## Installation
 dependencies: boost (sudo apt-get install libboost-all-dev)
-
+main.sh is the main file 
+it exports python path to the current to deepsort
 
 ### Creating model
 

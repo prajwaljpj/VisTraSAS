@@ -5,7 +5,7 @@ import subprocess
 from multiprocessing import Process
 import errno
 import cv2
-from boundbox import Box, wrap_box
+from python.boundbox import Box, wrap_box
 
 
 def setBbox():
