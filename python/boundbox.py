@@ -1,7 +1,6 @@
 import os
 import cv2
-
-
+import configparser
 
 class Box(object):
     """Documentation for Box
@@ -10,18 +9,25 @@ class Box(object):
 
     def __init__(self, box_tuple):
         super(Box, self).__init__()
+        parser = configparser.SafeConfigParser()
+        found = parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
+        classes = parser.get("general", "classes")
+        with open(classes, "r") as cls_file:
+            cls_names = cls_file.readlines()
+            cls_names = [nm.strip() for nm in cls_names]
+        self.class_names_dict = {cls_names[i]: i for i in range(len(cls_names))}
         self.box_tuple = box_tuple
-        self.class_names_dict = {
-            "car": 0,
-            "bus": 1,
-            "truck": 2,
-            "three-wheeler": 3,
-            "two-wheeler": 4,
-            "lcv": 5,
-            "tempo-traveller": 6,
-            "bicycle": 7,
-            "people": 8
-        }
+        # self.class_names_dict = {
+        #     "car": 0,
+        #     "bus": 1,
+        #     "truck": 2,
+        #     "three-wheeler": 3,
+        #     "two-wheeler": 4,
+        #     "lcv": 5,
+        #     "tempo-traveller": 6,
+        #     "bicycle": 7,
+        #     "people": 8
+        # }
         self.box_dict = self.todict()
 
     def todict(self):
@@ -62,14 +68,10 @@ class Box(object):
     def class_id(self):
         return self.box_dict["class"]["class_id"]
 
+    def ds_format(self):
+        op = (self.left(), self.top(), self.right()-self.left(), self.top()-self.bottom())
+        return op
+
+
     def __dict__(self):
         return self.box_dict
-
-
-def wrap_box(image_frame, box):
-    print(box.left())
-    cv2.rectangle(image_frame, (box.left(), box.top()), (box.right(), box.bottom()), (255,0,0), 2)
-    cv2.putText(image_frame, box.class_name(), (box.left(), box.top()), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-    cv2.putText(image_frame, str(box.class_confidence()),
-                (box.right(), box.bottom()), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
-    return image_frame
