@@ -15,6 +15,11 @@ class SuFrame(object):
     def set_trackers(self, trackers):
         self.trackers = trackers
 
+    def set_HgPoints(self, HgPoints):
+        self.HgPoints = HgPoints
+
+    def set_HgPointers(self, HgPointers):
+        self.HgPointers = HgPointers
 
     # get members
     def get_trackers(self):
@@ -22,6 +27,18 @@ class SuFrame(object):
             print("No trackers available")
             return None
         return self.trackers
+
+    def get_HgPoints(self):
+        if not self.HgPoints:
+            print("No achor points available")
+            return None
+        return self.HgPoints
+
+    def get_HgPointers(self):
+        if not self.set_HgPointers:
+            print("No achor points available")
+            return None
+        return self.set_HgPointers
 
     def get_image(self):
         if not self.frame:
