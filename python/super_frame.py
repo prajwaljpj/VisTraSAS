@@ -11,6 +11,18 @@ class SuFrame(object):
         self.frame = frame
         self.dets = dets
 
+    # set members 
+    def set_trackers(self, trackers):
+        self.trackers = trackers
+
+
+    # get members
+    def get_trackers(self):
+        if not self.trackers:
+            print("No trackers available")
+            return None
+        return self.trackers
+
     def get_image(self):
         if not self.frame:
             print("frame is black")
