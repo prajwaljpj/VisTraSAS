@@ -45,11 +45,14 @@ class deepsort_tracker():
             out_boxes[b][1] = out_boxes[b][1] - out_boxes[b][3]/2
         return out_boxes
 
-    def run_deep_sort(self, frame, out_scores, out_boxes, out_classes):
+    def run_deep_sort(self, super_frame):
 
-        out_boxes = self.format_yolo_output(out_boxes)
+        # out_boxes = self.format_yolo_output(out_boxes)
+        bbox = super_frame.get_ds_boxes()
+        score = super_frame.get_scores()
+        frame = super_frame.get_image()
 
-        detections = np.array(out_boxes)
+        detections = np.array(bbox)
         features = self.encoder(frame, detections.copy())
         #features = self.encoder.extract_features(frame,detections)
 
