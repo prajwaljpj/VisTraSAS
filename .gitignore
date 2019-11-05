@@ -1,3 +1,8 @@
 /models/*
 /test/*
 /segments/*.flv
+/main.sh~
+/python/deepsort.py~
+/python/line_counts.py~
+/python/super_frame.py~
+/segments/README.md~
