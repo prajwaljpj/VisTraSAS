@@ -49,8 +49,9 @@ class deepsort_tracker():
 
         # out_boxes = self.format_yolo_output(out_boxes)
         bbox = super_frame.get_ds_boxes()
-        score = super_frame.get_scores()
+        out_scores = super_frame.get_scores()
         frame = super_frame.get_image()
+        out_classes = super_frame.get_class_names()
 
         detections = np.array(bbox)
         features = self.encoder(frame, detections.copy())
@@ -71,4 +72,5 @@ class deepsort_tracker():
         self.tracker.predict()
         self.tracker.update(detections)
         trackers = self.tracker.tracks
+        super_frame.set_trackers(trackers)
         return trackers

@@ -7,17 +7,20 @@ import cv2
 from python.boundbox import Box
 from python.super_frame import SuFrame
 from python.deepsort import deepsort_tracker
+from python.line_counts import counts
+from python.vehicle_speed import VehicleSpeed
 import configparser
 
 class Analytics(object):
     """Top level of the analytics pipeline
 
     """
-    def __init__(self, segment_source, pipe_path, line_coordinates):
+    def __init__(self, segment_source, pipe_path, line_coordinates, camera_intrinsics):
         super(Analytics, self).__init__()
         self.segment_source = segment_source
         self.pipe_path = pipe_path
         self.line_coordinates = line_coordinates
+        self.camera_intrinsics = camera_intrinsics
         
         parser = configparser.SafeConfigParser()
         parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
@@ -51,11 +54,15 @@ class Analytics(object):
             if oe.errno != errno.EEXIST:
                 raise
         fifo = os.open(self.pipe_path, os.O_RDONLY)
+        # TODO add a functionality to close fifo pipe somehow
         return fifo
 
     def run_analytics(self, fifo):
-        DeepSort = deepsort_tracker()
         while(True):
+            DeepSort = deepsort_tracker()
+            counter = counts(self.line_coordinates)
+            # TODO add camera intrinsics and extract model in vehicle speeds
+            speeder = VehicleSpeed()
             frame_number = 1
             latest_video = self.get_video_to_process()
             self.check_and_delete()
@@ -87,7 +94,13 @@ class Analytics(object):
                 sframe.set_dets(detections)
                 # yolo is done above
                 # deepsort
-                sframe = deepsort_tracker.run_deep_sort(sFrame)
+                trackers = DeepSort.run_deep_sort(sframe)
+                vehicle_counts = counter.get_count(sframe)
+                vehicle_speeds = speeder.get_speed(sframe)
+
+                print("VC::", vehicle_counts)
+                print("VS", vehicle_speeds)
+
 
 
 
