@@ -36,7 +36,7 @@ class VehicleSpeed:
         #finetuned_reshaped = finetuned.reshape((-1,2))
         err = np.multiply((imagepoints - finetuned), weights)
         self.update_weights(err)
-    #	print (weights)
+    #	# print (weights)
     #	time.sleep(0.1)	
         return err
 
@@ -76,7 +76,7 @@ class VehicleSpeed:
     #     for i in range(24):
     #         ponting = np.array([[pts[i]]], dtype=np.float)
     #         imgpoints2, _ = cv2.projectPoints(ponting, pose[0:3], pose[3:6], mtx, dist)
-    #         print (imgpoints2[0][0])
+    #         # print (imgpoints2[0][0])
     #         x,y = int(imgpoints2[0][0][0]+bbox['bbox'][0]), int(imgpoints2[0][0][1]+bbox['bbox'][1])
     #         cv2.circle(frame, (x,y), 5, (0,0,255), -1)
 
@@ -165,8 +165,8 @@ class VehicleSpeed:
             placeholder[i+3]=tvecs_opt[i]
         # self.get_printed(bbox, frame, framenumber+1000, placeholder)
 
-        print ("idhar dekho", rvecs, "\n", tvecs, "\n", rvecs_opt, "\n", tvecs_opt)
-        print ("translation", old_error - new_error, old_error, new_error)
+        # # print ("idhar dekho", rvecs, "\n", tvecs, "\n", rvecs_opt, "\n", tvecs_opt)
+        # # print ("translation", old_error - new_error, old_error, new_error)
         #time.sleep(1)
 
         if new_error<=old_error:
@@ -216,16 +216,16 @@ class VehicleSpeed:
             bbox = list(map(int,bbox))
 
             x1,y1,x2,y2 = bbox
-            #print ("weell", x1, x2, y1, y2)
+            ## print ("weell", x1, x2, y1, y2)
             #time.sleep(1)
 
             #cv2.line(frame,count_line[0],count_line[1],(0,0,0),2)
             cropped = frame[y1:y2, x1:x2]
-            cv2.rectangle(frame, (x1,y1),(x2,y2),(255, 255, 0),3)
-            cv2.putText(frame, "ID:"+str(id_number) , (x2,y2),cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0),2, cv2.LINE_AA)
-            cv2.putText(frame, str(classname.decode("utf-8")), (int(x1), int(y1)), cv2.FONT_HERSHEY_COMPLEX,1.15, (0, 255, 255),2)
-            if (onlyspeed==True):
-                cv2.putText(frame, "Speed:"+str(round(speed, 2))+ "m/s" , (x2+50,y2), cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0),2, cv2.LINE_AA)
+            # cv2.rectangle(frame, (x1,y1),(x2,y2),(255, 255, 0),3)
+            # cv2.putText(frame, "ID:"+str(id_number) , (x2,y2),cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0),2, cv2.LINE_AA)
+            # cv2.putText(frame, str(classname.decode("utf-8")), (int(x1), int(y1)), cv2.FONT_HERSHEY_COMPLEX,1.15, (0, 255, 255),2)
+            # if (onlyspeed==True):
+            #     cv2.putText(frame, "Speed:"+str(round(speed, 2))+ "m/s" , (x2+50,y2), cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0),2, cv2.LINE_AA)
             #cv2.putText(frame, "CLASS:"+str(classname) , (x2,y2),cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0), 1, cv2.LINE_AA)
             #cv2.putText(frame, "Speed:"+ str(speed) +' Km/hr' , (x2+10,y2+10),cv2.FONT_HERSHEY_SIMPLEX,  0.8, (0, 0 , 0), 2, cv2.LINE_AA)
         return frame, cropped
@@ -243,7 +243,7 @@ class VehicleSpeed:
             self.framecount+=1
 
             for i in class_boxes:
-                print ("ndjekbdje3", i['id'], self.framecount)
+                # print ("ndjekbdje3", i['id'], self.framecount)
                 if not(any(i['id'] == x  for x in self.tracked)):
                     frame, cropped = self.draw_boxes(frame, [i], 0, False)
                     #cropped = cv2.imread('/home/shantam/Documents/Programs/hourglasstensorlfow/images/cropped0.jpg')
@@ -254,14 +254,16 @@ class VehicleSpeed:
                         cropped_new = np.moveaxis(cropped, 2, 0)
 
                         pointers, points = self.model.forward_pass(cropped_new)
-                        #print ("printing", pointers, points)
+                        frame_obj.set_HgPoints(points)
+                        frame_obj.set_HgPointers(points)
+                        ## print ("printing", pointers, points)
 
                         transformed_points=[]
                         for point in points:
                             x,y = int(point[0]+i['bbox'][0]), int(point[1]+i['bbox'][1])
                             transformed_points.append([x,y])
                             cv2.circle(frame, (x,y), 5, (0,0,255), -1)
-                            #print ("pointssss", x,y)
+                            ## print ("pointssss", x,y)
 
                         if len(points)>=4:
                             self.tracked.append(i['id'])
@@ -278,13 +280,13 @@ class VehicleSpeed:
 
                             if back>=2:
                                 self.tracking.append({'track_id': i['id'], 'detections':0, 'lastpose': position, 'speed':0, 'currentpose': position, 'computes': 0, 'orientation': 'away', 'lastframe':self.framecount, 'currentframe': self.framecount, 'latest':0})
-                                print ("orientation", "away", back, front, position)
+                                # # print ("orientation", "away", back, front, position)
                             elif front>=3:
                                 self.tracking.append({'track_id': i['id'], 'detections':0, 'lastpose': position, 'speed':0, 'currentpose': position, 'computes': 0, 'orientation': 'towards', 'lastframe':self.framecount, 'currentframe': self.framecount, 'latest':0})
-                                print ("orientation", "towards", back, front, position)
+                                # # print ("orientation", "towards", back, front, position)
                             else:
                                 self.tracking.append({'track_id': i['id'], 'detections':0, 'lastpose': position, 'speed':0, 'currentpose': position, 'computes': 0, 'orientation': 'unknown', 'lastframe':self.framecount, 'currentframe': self.framecount, 'latest':0})
-                                print ("orientation", "unknown", back, front, position)	
+                                # # print ("orientation", "unknown", back, front, position)	
 
                             #cv2.imshow("initial", frame)
                             #cv2.waitKey(10)
@@ -300,24 +302,24 @@ class VehicleSpeed:
                             j['detections']+=1
 
                             if j['detections']==2:
-                                print ("5 hoagye", j["detections"], self.framecount)
+                                # print ("5 hoagye", j["detections"], self.framecount)
                                 if (ht>100 and wd>100) or (ht>150) or (wd>150):
                                     j['computes']+=1
                                     cropped = np.array(cv2.cvtColor(cropped, cv2.COLOR_BGR2RGB))
                                     cropped_new = np.moveaxis(cropped, 2, 0)
                                     pointers, points = self.model.forward_pass(cropped_new)
-                                    print ("length", len(points))
+                                    # # print ("length", len(points))
 
                                     transformed_points=[]
                                     for point in points:
-                                        #print (point)
+                                        ## # print (point)
                                         #x,y = point[0], point[1]
                                         #cv2.circle(frame, (x,y), 5, (0,0,255), -1)
 
                                         x,y = int(point[0]+i['bbox'][0]), int(point[1]+i['bbox'][1])
                                         transformed_points.append([x,y])
                                         cv2.circle(frame, (x,y), 5, (0,0,255), -1)
-                                        #print ("pointssss", x,y)
+                                        ## # print ("pointssss", x,y)
 
                                     # cv2.imshow("initial", frame)
                                     # cv2.waitKey(10)
@@ -325,7 +327,7 @@ class VehicleSpeed:
                                     if len(points)>=4:								
                                         position = self.compute_pose(i, frame, self.frame_number, pointers, transformed_points)
 
-                                        #print ("POSITIONSSSS", position)
+                                        ## # print ("POSITIONSSSS", position)
                                         #time.sleep(2)
 
                                         if (j['orientation']=='away') and (position[2]>=j['lastpose'][2]):
@@ -336,7 +338,7 @@ class VehicleSpeed:
                                                 j['currentpose'] = position
                                                 j['currentframe'] = self.framecount
                                                 j['detections'] = 0
-                                                print ("poses here", j['lastpose'], j['currentpose'])
+                                                # print ("poses here", j['lastpose'], j['currentpose'])
 
                                                 speed = self.distance(j['lastpose'], j['currentpose'])/(float(j['currentframe']-j['lastframe'])*t)
                                                 if speed < 2000:
@@ -344,10 +346,10 @@ class VehicleSpeed:
                                                     j['lastpose'] = position
                                                     extra, unnecessary = self.draw_boxes(frame, [i], j['speed']/j['computes'], True)
                                                     #cv2.imshow("speeded", extra)
-                                                    print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], speed, "going away", j['currentframe'], j['lastframe'])
+                                                    # print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], speed, "going away", j['currentframe'], j['lastframe'])
                                                     j['lastframe'] = self.framecount
                                                     j['latest'] = j['speed']/j['computes']
-                                                    print ("this one", j['latest'], j['computes'])
+                                                    # print ("this one", j['latest'], j['computes'])
                                                     #time.sleep(0.5)
 
                                                 else:
@@ -361,12 +363,12 @@ class VehicleSpeed:
                                         elif (j['orientation']=='towards') and (position[2]<=j['lastpose'][2]):
 
                                             #if (abs(position[2]-j['lastpose'][2]))<500:
-                                            print ("difference in z", abs(position[2]-j['lastpose'][2]))
+                                            # print ("difference in z", abs(position[2]-j['lastpose'][2]))
                                             if ((abs(position[2]-j['lastpose'][2]))<(1500+(self.framecount-j['lastframe'])*20)) and ((abs(position[2]-j['lastpose'][2]))>50): #(framecount-j['lastframe'])*20):
                                                 j['currentpose'] = position
                                                 j['currentframe'] = self.framecount
                                                 j['detections'] = 0
-                                                print ("poses here", j['lastpose'], j['currentpose'])
+                                                # print ("poses here", j['lastpose'], j['currentpose'])
 
                                                 speed = self.distance(j['lastpose'], j['currentpose'])/(float(j['currentframe']-j['lastframe'])*t)
                                                 #j['speed'] += speed/100.0
@@ -375,10 +377,10 @@ class VehicleSpeed:
                                                     j['lastpose'] = position
                                                     extra, unnecessary = self.draw_boxes(frame, [i], j['speed']/j['computes'], True)
                                                     #v2.imshow("speeded", extra)
-                                                    print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], len(points), speed, "coming near", j['currentframe'], j['lastframe'])
+                                                    # print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], len(points), speed, "coming near", j['currentframe'], j['lastframe'])
                                                     j['lastframe'] = self.framecount
                                                     j['latest'] = j['speed']/j['computes']
-                                                    print ("this one", j['latest'], j['computes'])
+                                                    # print ("this one", j['latest'], j['computes'])
                                                     #time.sleep(0.5)
 
                                                 else:
@@ -410,7 +412,7 @@ class VehicleSpeed:
                                                 j['currentpose'] = position
                                                 j['currentframe'] = self.framecount
                                                 j['detections'] = 0
-                                                print ("poses here", j['lastpose'], j['currentpose'])
+                                                # print ("poses here", j['lastpose'], j['currentpose'])
 
                                                 speed = self.distance(j['lastpose'], j['currentpose'])/(float(j['currentframe']-j['lastframe'])*t)
                                                 #j['speed'] += speed/100.0
@@ -419,10 +421,10 @@ class VehicleSpeed:
                                                     j['lastpose'] = position
                                                     extra, unnecessary = self.draw_boxes(frame, [i], j['speed']/j['computes'], True)
                                                     #cv2.imshow("speeded", extra)
-                                                    print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], len(points), speed, "unknown orientation", j['currentframe'], j['lastframe'])
+                                                    # print ("\n", 'speed', j['speed']/j['computes'],  j['track_id'], len(points), speed, "unknown orientation", j['currentframe'], j['lastframe'])
                                                     j['lastframe'] = self.framecount
                                                     j['latest'] = j['speed']/j['computes']
-                                                    print ("this one", j['latest'], j['computes'])
+                                                    # print ("this one", j['latest'], j['computes'])
                                                     #time.sleep(0.5)
 
                                                 else:
@@ -447,7 +449,7 @@ class VehicleSpeed:
                 if not(any(x == m['id'] for m in class_boxes)):
                     self.tracked.remove(x)
 
-            print ("so far", self.tracked)
+            # print ("so far", self.tracked)
             #time.sleep(.2)
             #for k in tracked:
 
