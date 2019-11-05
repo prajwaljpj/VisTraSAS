@@ -233,8 +233,8 @@ class VehicleSpeed:
 
     def estimate_speed(self, frame_obj):
 
-        frame = frame_obj.get_image
-        class_boxes = frame_obj.get_dets
+        frame = frame_obj.get_image()
+        class_boxes = frame_obj.get_dets()
 
         if frame is not None:
             #cv2.imwrite('temp/image.jpg',frame)
@@ -464,3 +464,5 @@ class VehicleSpeed:
             #out.write(frame)
             #format_save(out_boxes,out_classes,frame)
             self.frame_number+=1
+
+            return speed
