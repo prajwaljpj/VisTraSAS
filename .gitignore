@@ -1,8 +1,12 @@
 /models/*
 /test/*
 /segments/*.flv
+<<<<<<< HEAD
 /main.sh~
 /python/deepsort.py~
 /python/line_counts.py~
 /python/super_frame.py~
 /segments/README.md~
+=======
+python/test.py
+>>>>>>> sadgun_dev

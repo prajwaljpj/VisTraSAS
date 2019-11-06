@@ -6,10 +6,43 @@ class SuFrame(object):
     pushed around between modules easily.
     """
 
-    def __init__(self, frame, dets):
+    def __init__(self, frame):
         super(SuFrame, self).__init__()
         self.frame = frame
-        self.dets = dets
+
+    # set members 
+    def set_dets(self, dets):
+        if not isinstance(dets, (tuple)):
+            print("ERROR: Wrong data type passed as argument, expected tuple got {}".format(type(dets)))
+        self.dets = dets 
+
+    def set_trackers(self, trackers):
+        self.trackers = trackers
+
+    def set_HgPoints(self, HgPoints):
+        self.HgPoints = HgPoints
+
+    def set_HgPointers(self, HgPointers):
+        self.HgPointers = HgPointers
+
+    # get members
+    def get_trackers(self):
+        if not self.trackers:
+            print("No trackers available")
+            return None
+        return self.trackers
+
+    def get_HgPoints(self):
+        if not self.HgPoints:
+            print("No achor points available")
+            return None
+        return self.HgPoints
+
+    def get_HgPointers(self):
+        if not self.set_HgPointers:
+            print("No achor points available")
+            return None
+        return self.set_HgPointers
 
     # set members 
     def set_trackers(self, trackers):
