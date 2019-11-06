@@ -19,23 +19,26 @@ class Analytics(object):
 
     """
 
-    def __init__(self, segment_source, pipe_path, line_coordinates_path, camera_intrinsics):
+    def __init__(self, segment_source, pipe_path, line_coordinates_path, camera_intrinsics_file):
         super(Analytics, self).__init__()
         self.segment_source = segment_source
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
-        self.camera_intrinsics = camera_intrinsics
+        self.camera_intrinsics_file = camera_intrinsics_file
         parser = configparser.SafeConfigParser()
         parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
         with open(self.line_coordinates_path, 'r') as lcp:
             lc = json.loads(lcp)
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
+        with open(self.camera_intrinsics_file, 'r') as cif:
+            self.camera_intrinsics = json.loads(cif)
 
 
     def get_latest(self, segment_path):
         list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
         latest_file = max(list_of_files, key=os.path.getctime)
         return latest_file
+
 
     def get_video_to_process(self):
         if not os.path.exists(self.segment_source):
@@ -47,12 +50,14 @@ class Analytics(object):
             return latest_file
         return []
 
+
     def check_and_delete(self):
         list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
         if len(list_of_files) > 10:
             sorted_list = sorted(list_of_files, key=os.path.getmtime)
             for segfile in sorted_list[:len(sorted_list)-2]:
                 os.remove(segfile)
+
 
     def getboxval(self):
         try:
@@ -64,12 +69,13 @@ class Analytics(object):
         # TODO add a functionality to close fifo pipe somehow
         return fifo
 
+
     def run_analytics(self):
         while(True):
             DeepSort = deepsort_tracker()
             counter = counts(self.line_coordinates)
             # TODO add camera intrinsics and extract model in vehicle speeds
-            speeder = VehicleSpeed()
+            speeder = VehicleSpeed(self.camera_intrinsics)
             frame_number = 1
             # latest_video = self.get_video_to_process()
             # self.check_and_delete()
@@ -133,10 +139,13 @@ if __name__ == "__main__":
                           type=lambda x: is_valid_file(agparser, x),
                           help='Path to the line points json file for the \
                           correesponding stream')
-    agparser.add_argument('--camera_intrinsics', metavar='i',
+    agparser.add_argument('--camera_intrinsics_file', metavar='i',
                           type=lambda x: is_valid_file(agparser, x),
-                          help='Camera intrinsics')
+                          help='Camera intrinsics file path')
     args = agparser.parse_args()
 
-    analytics = Analytics(args.segment_source, args.pipe_path, args.line_coordinates, args.camera_intrinsics)
+    analytics = Analytics(args.segment_source,
+                          args.pipe_path,
+                          args.line_coordinates,
+                          args.camera_intrinsics_file)
     analytics.run_analytics()
