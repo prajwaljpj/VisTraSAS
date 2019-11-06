@@ -157,7 +157,9 @@ INVENV=$(python -c 'import sys; print ("1" if hasattr(sys, "real_prefix") else "
 
 if [ $INVENV -eq 1 ]
 then echo "inside python environment"
-else echo "WARNING:: outside python environment" 
+else
+    echo "WARNING:: outside python environment" 
+    workon all
 fi
 
 # checking if engine file is present
