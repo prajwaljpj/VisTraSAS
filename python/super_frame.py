@@ -6,12 +6,16 @@ class SuFrame(object):
     pushed around between modules easily.
     """
 
-    def __init__(self, frame, dets):
+    def __init__(self, frame):
         super(SuFrame, self).__init__()
         self.frame = frame
-        self.dets = dets
 
     # set members 
+    def set_dets(self, dets):
+        if not isinstance(dets, (tuple)):
+            print("ERROR: Wrong data type passed as argument, expected tuple got {}".format(type(dets)))
+        self.dets = dets 
+
     def set_trackers(self, trackers):
         self.trackers = trackers
 

@@ -109,6 +109,7 @@ class VehicleSpeed:
         right mirror, right center pole top, right wheel, top corner front right, left mirror, left center pole top, top corner front left , indicator light left, left wheel, Wind shield(top left)
         Wind shield(top right), Wind shield(bottom left), Wind shield(bottom right), front bonet, head light left, Head light right'''
 
+        # TODO: add this in the config
         mtx = np.array([[1324.110551, 0.000000, 993.993108], [0.000000, 1324.110210, 621.997610],[  0. ,   0. ,   1. ]])
         dist = np.array([[-0.401747, 0.148985, -0.008159, -0.006626, 0.000000]]) 
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -231,10 +232,10 @@ class VehicleSpeed:
         return frame, cropped
 
 
-    def estimate_speed(self, frame_obj):
+    def get_speed(self, su_frame):
 
-        frame = frame_obj.get_image()
-        class_boxes = frame_obj.get_dets()
+        frame = su_frame.get_image()
+        class_boxes = su_frame.get_dets()
 
         if frame is not None:
             #cv2.imwrite('temp/image.jpg',frame)
@@ -253,9 +254,10 @@ class VehicleSpeed:
                         #cropped = cv2.resize(cropped, (256,256))
                         cropped_new = np.moveaxis(cropped, 2, 0)
 
+                        # TODO remove hourglass and put it outside
                         pointers, points = self.model.forward_pass(cropped_new)
-                        frame_obj.set_HgPoints(points)
-                        frame_obj.set_HgPointers(points)
+                        su_frame.set_HgPoints(points)
+                        su_frame.set_HgPointers(points)
                         ## print ("printing", pointers, points)
 
                         transformed_points=[]
