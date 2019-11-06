@@ -46,7 +46,8 @@ int main(int argc, char** argv)
     // Check if camera opened successfully
     if(!cap.isOpened()){
       // cout << "C++ side ::::::::: Error opening video stream or file" << endl;
-      return -1;
+      continue;
+      // return -1;
     }
     write(fd, &latest_file, 28);
     while(1){
@@ -121,6 +122,7 @@ int main(int argc, char** argv)
       // this_thread::sleep_for(chrono::seconds(1));
 
     }
+    check_and_delete(dir_path);
 
     }
   close(fd);
