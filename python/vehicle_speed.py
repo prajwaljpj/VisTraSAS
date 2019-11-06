@@ -14,7 +14,7 @@ weights = np.ones((48))
 
 class VehicleSpeed:
 
-    def __init__(self):
+    def __init__(self, camera_mat):
 
         self.model = hourglass_single.Hourglass()
         self.tracked = []
@@ -26,6 +26,9 @@ class VehicleSpeed:
         #global tracked, last, tracking
         self.found = 0
         self.t = 1.0/20.0 #45.0/900.0#25.0/497.0#10.0/191.0#7.0/125.0
+
+        self.mtx = camera_mat['camera_matrix']
+        self.dist = camera_mat['dist_coeff']
 
 
 
@@ -51,15 +54,15 @@ class VehicleSpeed:
     def get_error(self, pose, points):
 
         pts={0: [45.0, 256.5, 71.0], 1: [-45.0, 256.5, 71.0], 2: [56.0, 186.7, 89.0], 3: [-56.0, 186.7, 89.0], 4: [51.0, 240.0, 149.5], 5: [-51.0, 240.0, 149.5], 6: [0.0, 260.0, 41.5], 7: [-47.5, 43.6, 104.7], 8: [-57.0, 57.8, 145.5], 9: [-54.3, 135.0, 149.8], 10: [-66.4, 220.0, 19.8], 11: [-43.0, 68.0, 165.6], 12: [57.0, 57.8, 145.5], 13: [54.3, 135.0, 149.8], 14: [43.0, 68.0, 165.6], 15: [47.5, 43.6, 104.7], 16: [66.4, 220.0, 19.8], 17: [44.2, 61.5, 152.4], 18: [-44.2, 61.5, 152.2], 19: [49.0, 56.0, 116.5], 20: [-49.0, 56.0, 116.5], 21: [0.0, 0.0, 38.0], 22: [33.0, 36.0, 83.5], 23: [-33.0, 36.0, 83.5]}
-        mtx = np.array([[1324.110551, 0.000000, 993.993108], [0.000000, 1324.110210, 621.997610],[  0. ,   0. ,   1. ]])
-        dist = np.array([[-0.401747, 0.148985, -0.008159, -0.006626, 0.000000]]) 
+        # mtx = np.array([[1324.110551, 0.000000, 993.993108], [0.000000, 1324.110210, 621.997610],[  0. ,   0. ,   1. ]])
+        # dist = np.array([[-0.401747, 0.148985, -0.008159, -0.006626, 0.000000]]) 
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
         imagepoints_finetuned = np.empty((len(points)*2), dtype=np.float)
 
         for i in range(len(points)):
             ponting = np.array([[pts[points[i]]]], dtype=np.float)
-            imgpoints2, _ = cv2.projectPoints(ponting, pose[0:3], pose[3:6], mtx, dist)
+            imgpoints2, _ = cv2.projectPoints(ponting, pose[0:3], pose[3:6], self.mtx, self.dist)
             imagepoints_finetuned[i*2], imagepoints_finetuned[2*i+1] = imgpoints2[0][0][0], imgpoints2[0][0][1]
 
         return (imagepoints_finetuned)
@@ -109,9 +112,8 @@ class VehicleSpeed:
         right mirror, right center pole top, right wheel, top corner front right, left mirror, left center pole top, top corner front left , indicator light left, left wheel, Wind shield(top left)
         Wind shield(top right), Wind shield(bottom left), Wind shield(bottom right), front bonet, head light left, Head light right'''
 
-        # TODO: add this in the config
-        mtx = np.array([[1324.110551, 0.000000, 993.993108], [0.000000, 1324.110210, 621.997610],[  0. ,   0. ,   1. ]])
-        dist = np.array([[-0.401747, 0.148985, -0.008159, -0.006626, 0.000000]]) 
+        # mtx = np.array([[1324.110551, 0.000000, 993.993108], [0.000000, 1324.110210, 621.997610],[  0. ,   0. ,   1. ]])
+        # dist = np.array([[-0.401747, 0.148985, -0.008159, -0.006626, 0.000000]]) 
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
         worldpoints = np.zeros([len(points),3])
@@ -132,7 +134,7 @@ class VehicleSpeed:
         for i in range(len(points)):
             imgpoint = np.array([float(imagepoints[i][0]), float(imagepoints[i][1])])
             ponting = np.array([[pts[points[i]]]], dtype=np.float)
-            imgpoints2, _ = cv2.projectPoints(ponting, rvecs, tvecs, mtx, dist)
+            imgpoints2, _ = cv2.projectPoints(ponting, rvecs, tvecs, self.mtx, self.dist)
             error = cv2.norm(imgpoint, imgpoints2[0][0], cv2.NORM_L2)/len(imgpoints2)
             mean_error += error
         old_error = mean_error/len(points)
@@ -155,7 +157,7 @@ class VehicleSpeed:
         for i in range(len(points)):
             imgpoint = np.array([float(imagepoints[i][0]), float(imagepoints[i][1])])
             ponting = np.array([[pts[points[i]]]], dtype=np.float)
-            imgpoints2, _ = cv2.projectPoints(ponting, rvecs_opt, tvecs_opt, mtx, dist)
+            imgpoints2, _ = cv2.projectPoints(ponting, rvecs_opt, tvecs_opt, self.mtx, self.dist)
             error = cv2.norm(imgpoint, imgpoints2[0][0], cv2.NORM_L2)/len(imgpoints2)
             mean_error += error
         new_error = mean_error/len(points)
