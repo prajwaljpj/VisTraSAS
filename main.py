@@ -1,32 +1,39 @@
 import os
 import glob
-import sys
 import struct
 import errno
 import cv2
+import configparser
+import argparse
+import json
+
 from python.boundbox import Box
 from python.super_frame import SuFrame
 from python.deepsort import deepsort_tracker
 from python.line_counts import counts
 from python.vehicle_speed import VehicleSpeed
-import configparser
+
 
 class Analytics(object):
     """Top level of the analytics pipeline
 
     """
-    def __init__(self, segment_source, pipe_path, line_coordinates, camera_intrinsics):
+
+    def __init__(self, segment_source, pipe_path, line_coordinates_path, camera_intrinsics):
         super(Analytics, self).__init__()
         self.segment_source = segment_source
         self.pipe_path = pipe_path
-        self.line_coordinates = line_coordinates
+        self.line_coordinates_path = line_coordinates_path
         self.camera_intrinsics = camera_intrinsics
-        
         parser = configparser.SafeConfigParser()
         parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
+        with open(self.line_coordinates_path, 'r') as lcp:
+            lc = json.loads(lcp)
+        self.line_coordinates = [lc["point_1"], lc["point_2"]]
+
 
     def get_latest(self, segment_path):
-        list_of_files = glob.glob(os.path.join(segment_path, "*.flv")) # * means all if need specific format then *.csv
+        list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
         latest_file = max(list_of_files, key=os.path.getctime)
         return latest_file
 
@@ -57,7 +64,7 @@ class Analytics(object):
         # TODO add a functionality to close fifo pipe somehow
         return fifo
 
-    def run_analytics(self, fifo):
+    def run_analytics(self):
         while(True):
             DeepSort = deepsort_tracker()
             counter = counts(self.line_coordinates)
@@ -76,8 +83,8 @@ class Analytics(object):
                 sframe = SuFrame(frame)
 
                 try:
-                    head = os.read(fifo, 1)
-                except:
+                    head = os.read(fifo_pipe, 1)
+                except IOError:
                     print("didnt get header for frame")
                     continue
                 head = int.from_bytes(head, "big")
@@ -88,76 +95,46 @@ class Analytics(object):
                 detections = []
 
                 for i in range(head):
-                    data_bytes = os.read(fifo, 24)
+                    data_bytes = os.read(fifo_pipe, 24)
                     data = struct.unpack("=iiiiif", data_bytes)
                     detections.append(Box(data))
                 sframe.set_dets(detections)
                 # yolo is done above
                 # deepsort
                 trackers = DeepSort.run_deep_sort(sframe)
+                print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
                 vehicle_speeds = speeder.get_speed(sframe)
 
                 print("VC::", vehicle_counts)
-                print("VS", vehicle_speeds)
+                print("VS::", vehicle_speeds)
+            cap.release()
 
-
-
-
-def getBbox():
-
-    path = "/tmp/fifopipe"
-
-    try:
-        os.mkfifo(path)
-    except OSError as oe:
-        if oe.errno != errno.EEXIST:
-            raise
-
-    fifo = os.open(path, os.O_RDONLY)
-    frame_number = 1
-
-    while(True):
-        
-        if (videocap.isOpened() == False):
-            print("python side ::::::::: Error opening video stream or file")
-        out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (1280, 720))
-
-        while(videocap.isOpened()):
-            ret, frame = videocap.read()
-            if ret == False:
-                break
-
-            try:
-                head = os.read(fifo, 1)
-                print("python side ::::::::: value of head in try :: ", head)
-                # head = sys.stdin.read(1)
-            except:
-                print("python side ::::::::: some error :: end??")
-                sys.exit(0)
-
-            head = int.from_bytes(head, "big")
-            print("python side ::::::::: header length(number of boxes): ", head)
-            print("python side ::::::::: frame_number :::::::::::::: ", frame_number)
-            frame_number += 1
-            if head == 0:
-                print("python side ::::::::: data :::::::::::::: DATA IS EMPTY")
-                continue
-
-            for i in range(head):
-                data_byte = os.read(fifo, 24)
-                print("python side :::::::::::: data_byte value :::::: ", data_byte)
-                print("python side :::::::::::: data_byte value :::::: ",
-                      len(data_byte))
-                data = struct.unpack("=iiiiif", data_byte)
-
-                print("python side ::::::::: data :::::::::::::: ", data)
-                data = Box(data)
-                frame = wrap_box(frame, data)
-            out.write(frame)
-        videocap.release()
-        out.release()
+            
+def is_valid_file(agparser, ags):
+    if not os.path.exists(ags):
+        agparser.error("The file %s does not exist!" % ags)
+    else:
+        return ags
 
 
 if __name__ == "__main__":
-    getBbox()
+    agparser = argparse.ArgumentParser(description='Visual Traffic \
+               Surveillance and Analytics System')
+    agparser.add_argument('segment_source', metavar='S',
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='Source for video files from the rtsp stream')
+    agparser.add_argument('--pipe_path', metavar='p', default="/tmp/fifopipe",
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='Location of the pipe buffer (default:/tmp/fifopipe)')
+    agparser.add_argument('--line_coordinates', metavar='l',
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='Path to the line points json file for the \
+                          correesponding stream')
+    agparser.add_argument('--camera_intrinsics', metavar='i',
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='Camera intrinsics')
+    args = agparser.parse_args()
+
+    analytics = Analytics(args.segment_source, args.pipe_path, args.line_coordinates, args.camera_intrinsics)
+    analytics.run_analytics()
