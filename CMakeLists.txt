@@ -22,9 +22,11 @@ FIND_PACKAGE(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARIES_DIRS})
 
-#add Boost packages
-#include_directories( ${Boost_INCLUDE_DIR} "/home/rbccps2080ti/.virtualenvs/all/include/python3.6m")
-#find_package( Boost COMPONENTS python3 REQUIRED )
+# find and set Boost packages
+set(Boost_USE_STATIC_LIBS ON) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost REQUIRED COMPONENTS system filesystem) 
 
 # Build our library
 #add_library( yolotrt SHARED inference.cpp eval.cpp dataReader.cpp)
@@ -38,8 +40,13 @@ link_directories(${OpenCV_LIBRARIES_DIRS})
 
 
 #build runYolov3
-add_executable(runYolov3 ${SOURCE_DIR}/main_infer.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp)
+add_executable(runYolov3 ${SOURCE_DIR}/main_infer.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp ${SOURCE_DIR}/get_latest.cpp)
 target_link_libraries(runYolov3 TrtNet ${OpenCV_LIBS})
+# link boost libraries 
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+    target_link_libraries(runYolov3 ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+endif()
 
 install(TARGETS runYolov3 DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/)
 
