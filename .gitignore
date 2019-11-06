@@ -1,3 +1,4 @@
 /models/*
 /test/*
 /segments/*.flv
+python/test.py
