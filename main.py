@@ -81,6 +81,9 @@ class Analytics(object):
             fifo_pipe = self.getboxval()
             lat_file = os.read(fifo_pipe, 28).decode("urf-8")
             print(lat_file)
+            if not os.path.exists(lat_file):
+                print("The file has dissappeared in python, desynchronized")
+                sys.exit(0)
             cap = cv2.VideoCapture(lat_file)
             while (cap.isOpened()):
                 ret, frame = cap.read()
