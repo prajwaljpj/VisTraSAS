@@ -40,7 +40,7 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 
 
 #build runYolov3
-add_executable(runYolov3 ${SOURCE_DIR}/main_infer.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp)
+add_executable(runYolov3 ${SOURCE_DIR}/main_infer.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp ${SOURCE_DIR}/get_latest.cpp)
 target_link_libraries(runYolov3 TrtNet ${OpenCV_LIBS})
 # link boost libraries 
 if(Boost_FOUND)
