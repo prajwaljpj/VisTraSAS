@@ -1,18 +1,17 @@
-from deep_sort.deep_sort.tracker import Tracker
 import matplotlib.pyplot as plt
 import numpy as np
 import keras
 from deep_sort.deep_sort.detection import Detection
-from deep_sort.application_util import visualization
-from deep_sort.application_util import preprocessing as prep
+from deep_sort.application_util import visualization, preprocessing as prep
 from deep_sort.deep_sort import nn_matching
-from deep_sort import generate_detections
+from deep_sort.tools import generate_detections
+from deep_sort.deep_sort.tracker import Tracker
 import tensorflow as tf
 import os
 os.environ['KERAS_BACKEND'] = 'tensorflow'
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.15
-session = tf.Session(config=config)
+CONFIG = tf.ConfigProto()
+CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.15
+SESSION = tf.Session(config=CONFIG)
 
 
 class deepsort_tracker():
