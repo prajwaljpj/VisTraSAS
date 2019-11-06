@@ -1,23 +1,22 @@
 #!/bin/bash
 
-$package='VisTraSAS'
 while test $# -gt 0; do
     case "$1" in
 	-h|--help)
-	    echo "$package - Visual Traffic surveillance and Analytics System"
+	    echo "VisTraSAS - Visual Traffic surveillance and Analytics System"
 	    echo " "
-	    echo "$package [options] application [arguments]"
+	    echo "main.sh [options] application [arguments]"
 	    echo " "
 	    echo "options:"
 	    echo "-h, --help                               show brief help"
 	    echo "-e, --engine=ENGINE                      Specify engine file"
 	    echo "-v, --verbose=VERBOSE                    Verbosity(0 or 1)"
-	    echo "-c, --caffe-model=CAFFE_MODEL            Specify engine file"
-	    echo "-p, --caffe-proto=CAFFE_PROTO            Specify engine file"
-	    echo "-P, --pipe-path=PIPE_PATH                Specify engine file"
-	    echo "-s, --segment-path=SEGMENT_PATH          Specify engine file"
-	    echo "-l, --line-coord=LINE_COORD              Specify engine file"
-	    echo "-i, --intrinsics=CAM_PARAM               Specify engine file"
+	    echo "-c, --caffe-model=CAFFE_MODEL            Specify caffe model (if engine not present)"
+	    echo "-p, --caffe-proto=CAFFE_PROTO            Specify caffe prototxt (if engine not present)"
+	    echo "-P, --pipe-path=PIPE_PATH                Path where the piping buffer should be created"
+	    echo "-s, --segment-path=SEGMENT_PATH          Location of generated segments"
+	    echo "-l, --line-coord=LINE_COORD              Line coordinates for camera (specific to camera)"
+	    echo "-i, --intrinsics=CAM_PARAM               Camara Intrinsic parameters (specific to camera)"
 	    exit 0
 	    ;;
 	-e)
@@ -146,6 +145,7 @@ while test $# -gt 0; do
 done
 
 
+# when link is provided uncomment
 ffmpeg -i "rtsp link" -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$1/rtsp_%Y-%m-%d-_%H-%M-%S.flv &
 
 
@@ -168,4 +168,4 @@ if [ ! -f "$ENGINE"]; then
 fi
 
 ./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH
-python3 main.py --pipe-path=$PIPE_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM
+python3 main.py --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM $PIPE_PATH

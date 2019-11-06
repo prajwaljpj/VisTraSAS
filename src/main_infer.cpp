@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   while (1) {
     // Get list of videos realtime
     string dir_path = argv[3];
-    string latest_file = get_latest(dir_path);
+    string latest_file = latestFile(dir_path);
     // cv::VideoCapture cap("rtsp_2019-11-06_17-42-06.flv");
     cv::VideoCapture cap(latest_file);
     int frame_num = 0;

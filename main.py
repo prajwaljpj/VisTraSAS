@@ -19,9 +19,8 @@ class Analytics(object):
 
     """
 
-    def __init__(self, segment_source, pipe_path, line_coordinates_path, camera_intrinsics_file):
+    def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file):
         super(Analytics, self).__init__()
-        self.segment_source = segment_source
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
         self.camera_intrinsics_file = camera_intrinsics_file
@@ -34,29 +33,29 @@ class Analytics(object):
             self.camera_intrinsics = json.loads(cif)
 
 
-    def get_latest(self, segment_path):
-        list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
-        latest_file = max(list_of_files, key=os.path.getctime)
-        return latest_file
+    # def get_latest(self, segment_path):
+    #     list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
+    #     latest_file = max(list_of_files, key=os.path.getctime)
+    #     return latest_file
 
 
-    def get_video_to_process(self):
-        if not os.path.exists(self.segment_source):
-            os.mkdir(self.segment_source)
-        list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-        sorted_list = sorted(list_of_files, key=os.path.getmtime)
-        if len(sorted_list) != 0:
-            latest_file = sorted_list[-1]
-            return latest_file
-        return []
+    # def get_video_to_process(self):
+    #     if not os.path.exists(self.segment_source):
+    #         os.mkdir(self.segment_source)
+    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
+    #     sorted_list = sorted(list_of_files, key=os.path.getmtime)
+    #     if len(sorted_list) != 0:
+    #         latest_file = sorted_list[-1]
+    #         return latest_file
+    #     return []
 
 
-    def check_and_delete(self):
-        list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-        if len(list_of_files) > 10:
-            sorted_list = sorted(list_of_files, key=os.path.getmtime)
-            for segfile in sorted_list[:len(sorted_list)-2]:
-                os.remove(segfile)
+    # def check_and_delete(self):
+    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
+    #     if len(list_of_files) > 10:
+    #         sorted_list = sorted(list_of_files, key=os.path.getmtime)
+    #         for segfile in sorted_list[:len(sorted_list)-2]:
+    #             os.remove(segfile)
 
 
     def getboxval(self):
@@ -129,23 +128,21 @@ def is_valid_file(agparser, ags):
 if __name__ == "__main__":
     agparser = argparse.ArgumentParser(description='Visual Traffic \
                Surveillance and Analytics System')
-    agparser.add_argument('segment_source', metavar='S',
-                          type=lambda x: is_valid_file(agparser, x),
-                          help='Source for video files from the rtsp stream')
-    agparser.add_argument('--pipe_path', metavar='p', default="/tmp/fifopipe",
-                          type=lambda x: is_valid_file(agparser, x),
+    agparser.add_argument('pipe_path', metavar='p', default="/tmp/fifopipe",
+                          type=str,
                           help='Location of the pipe buffer (default:/tmp/fifopipe)')
     agparser.add_argument('--line_coordinates', metavar='l',
+                          default="configs/line_coord/test_cam.json"
                           type=lambda x: is_valid_file(agparser, x),
                           help='Path to the line points json file for the \
                           correesponding stream')
     agparser.add_argument('--camera_intrinsics_file', metavar='i',
+                          default="configs/cam_intrinsic/test_cam.json",
                           type=lambda x: is_valid_file(agparser, x),
                           help='Camera intrinsics file path')
     args = agparser.parse_args()
 
-    analytics = Analytics(args.segment_source,
-                          args.pipe_path,
+    analytics = Analytics(args.pipe_path,
                           args.line_coordinates,
                           args.camera_intrinsics_file)
     analytics.run_analytics()

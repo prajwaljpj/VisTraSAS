@@ -11,3 +11,6 @@
 python/test.py
 >>>>>>> sadgun_dev
 /segments/test_cam/
+/build/
+/install/
+/python/__pycache__/
