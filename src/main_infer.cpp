@@ -1,4 +1,5 @@
 #include "inference.hpp"
+#include "get_latest.hpp"
 
 #include <iostream>
 #include <fcntl.h>
@@ -10,18 +11,23 @@
 #include<chrono>
 #include "opencv2/opencv.hpp"
 
-
 using namespace std;
 
 int main(int argc, char** argv)
 { 
+  if (argc < 4)
+    return -1;
+
   // cout << "C++ side ::::::::: hello" << endl;
-  string enginename = "/home/rbccps2080ti/projects/TensorRT-Yolov3/yolov3_fp32.engine";
+  // string enginename = "/home/rbccps2080ti/projects/TensorRT-Yolov3/yolov3_fp32.engine";
+  string enginename = argv[1];
   // cout << enginename << endl;
   Inference iff;
   iff.loadTRTModel(enginename);
   int fd;
-  const char* myfifo = "/tmp/fifopipe";
+  string named_pipe = argv[2];
+  // const char* myfifo = "/tmp/fifopipe";
+  const char* myfifo = named_pipe.c_str();
   /* create the FIFO (named pipe) */
   mkfifo(myfifo, 0666);
   // cout << "C++ side ::::::::: Waiting for connection to open\n";
@@ -32,16 +38,17 @@ int main(int argc, char** argv)
 
   while (1) {
     // Get list of videos realtime
-    string latest_file = get_latest();
-    write(fd, &latest_file, 28);
-    cv::VideoCapture cap("rtsp_2019-11-06_17-42-06.flv");
-    
+    string dir_path = argv[3];
+    string latest_file = get_latest(dir_path);
+    // cv::VideoCapture cap("rtsp_2019-11-06_17-42-06.flv");
+    cv::VideoCapture cap(latest_file);
     int frame_num = 0;
     // Check if camera opened successfully
     if(!cap.isOpened()){
       // cout << "C++ side ::::::::: Error opening video stream or file" << endl;
       return -1;
     }
+    write(fd, &latest_file, 28);
     while(1){
  
       cv::Mat frame;

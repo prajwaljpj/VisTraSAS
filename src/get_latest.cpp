@@ -1,8 +1,4 @@
-#include <iostream>
-#include <boost/filesystem.hpp>
-#include <boost/range.hpp>
-
-namespace fs = boost::filesystem;
+#include "get_latest.hpp"
 
 std::string latestFile(std::string dirPath){
 
