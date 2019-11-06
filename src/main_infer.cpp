@@ -28,11 +28,14 @@ int main(int argc, char** argv)
   /* write message to the FIFO */
   fd = open(myfifo, O_WRONLY);
   // cout << "C++ side ::::::::: Connected\n";
-  cv::VideoCapture cap("latest.mp4");
+  
 
   while (1) {
     // Get list of videos realtime
-    cv::VideoCapture cap("latest.mp4");
+    string latest_file = get_latest();
+    write(fd, &latest_file, 28);
+    cv::VideoCapture cap("rtsp_2019-11-06_17-42-06.flv");
+    
     int frame_num = 0;
     // Check if camera opened successfully
     if(!cap.isOpened()){
@@ -54,6 +57,7 @@ int main(int argc, char** argv)
 
       // cout << "C++ side ::::::::: frame_num ::::::::: " << frame_num << endl;
       frame_num++;
+      
 
       vector<Bbox> op1 = iff.infer_single_image(frame);
       frame.release();
@@ -75,7 +79,7 @@ int main(int argc, char** argv)
       // fwrite(delim_char, sizeof(delim_char));
       // unsigned char total_box[24*op1.size()];
       // cout << "C++ side ::::::::: sizeof total_box ::::::::: " << sizeof(total_box) << endl;
-
+      
       // auto first = true;
       // auto i = 0;
 	

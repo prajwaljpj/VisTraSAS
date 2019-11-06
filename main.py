@@ -71,10 +71,12 @@ class Analytics(object):
             # TODO add camera intrinsics and extract model in vehicle speeds
             speeder = VehicleSpeed()
             frame_number = 1
-            latest_video = self.get_video_to_process()
-            self.check_and_delete()
+            # latest_video = self.get_video_to_process()
+            # self.check_and_delete()
             fifo_pipe = self.getboxval()
-            cap = cv2.VideoCapture(latest_video)
+            lat_file = os.read(fifo_pipe, 28).decode("urf-8")
+            print(lat_file)
+            cap = cv2.VideoCapture(lat_file)
             while (cap.isOpened()):
                 ret, frame = cap.read()
                 if not ret:

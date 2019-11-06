@@ -1,3 +1,4 @@
+import defaultdict
 import configparser
 from deepsort import deepsort_tracker
 
@@ -90,5 +91,9 @@ class counts(object):
             classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
         self.count_id(bbox, id_num, classname, frame)   
-        return_dict={'up_count':self.v_count_up, 'down_count':self.v_count_down, 'speed':self.speed}
+        return_dict = 
+        {
+            'up_count': self.v_count_up,
+            'down_count': self.v_count_down
+        }
         return return_dict
