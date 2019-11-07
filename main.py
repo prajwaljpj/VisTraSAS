@@ -6,13 +6,14 @@ import cv2
 import configparser
 import argparse
 import json
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
 from python.super_frame import SuFrame
 from python.deepsort import deepsort_tracker
 from python.line_counts import counts
-from python.vehicle_speed import VehicleSpeed
+# from python.vehicle_speed import VehicleSpeed
 
 
 class Analytics(object):
@@ -76,12 +77,15 @@ class Analytics(object):
             print("finished deepsort tracker init")
             counter = counts(self.line_coordinates)
             #  add camera intrinsics and extract model in vehicle speeds
-            speeder = VehicleSpeed(self.camera_intrinsics)
+            # TODO add speed module later
+            # speeder = VehicleSpeed(self.camera_intrinsics)
             frame_number = 1
             # latest_video = self.get_video_to_process()
             # self.check_and_delete()
             fifo_pipe = self.getboxval()
-            lat_file = os.read(fifo_pipe, 28).decode("urf-8")
+            lat_file = os.read(fifo_pipe, 28)
+            print(len(lat_file))
+            # lat_file = lat_file.decode("utf-8")
             print(lat_file)
             if not os.path.exists(lat_file):
                 print("The file has dissappeared in python, desynchronized")
@@ -117,10 +121,11 @@ class Analytics(object):
                 trackers = DeepSort.run_deep_sort(sframe)
                 print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
-                vehicle_speeds = speeder.get_speed(sframe)
+                # TODO add speeds module later
+                # vehicle_speeds = speeder.get_speed(sframe)
 
                 print("VC::", vehicle_counts)
-                print("VS::", vehicle_speeds)
+                # print("VS::", vehicle_speeds)
             cap.release()
 
             

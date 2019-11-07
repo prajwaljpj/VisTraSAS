@@ -170,6 +170,7 @@ if [ ! -f $ENGINE ]; then
 fi
 
 ./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
+# ./runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
 
 echo $PIPE_PATH $LINE_COORD $CAM_PARAM
 

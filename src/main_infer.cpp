@@ -39,17 +39,29 @@ int main(int argc, char** argv)
   while (1) {
     // Get list of videos realtime
     string dir_path = argv[3];
-    string latest_file = latestFile(dir_path);
+    fs::path latest_file = latestFile(dir_path);
+    string lat_file_path = latest_file.string();
+    string lat_file_name = latest_file.filename().string();
+    cout << "latest_file_path " << lat_file_path << endl;
+    cout << "latest_file_name " << lat_file_name << endl;
     // cv::VideoCapture cap("rtsp_2019-11-06_17-42-06.flv");
-    cv::VideoCapture cap(latest_file);
+    cv::VideoCapture cap(lat_file_path);
+    cout << "videocap success" << endl;
     int frame_num = 0;
     // Check if camera opened successfully
     if(!cap.isOpened()){
-      // cout << "C++ side ::::::::: Error opening video stream or file" << endl;
+      cout << "C++ side ::::::::: Error opening video stream or file" << endl;
       continue;
       // return -1;
     }
-    write(fd, &latest_file, 28);
+    // unsigned char *lat_fil_cstr;
+    cout << "before strcpy" << endl;
+    // strcpy(lat_fil_cstr, lat_file_name.c_str());
+    const char* lat_fil_cstr = lat_file_name.c_str();
+    // unsigned char* lat_fil_cstr = reinterpret_cast<unsigned char*>(lat_file_name.c_str()); 
+    cout << "latest file strcpy :: " << lat_fil_cstr << endl;
+    cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
+    write(fd, &lat_fil_cstr, strlen(lat_fil_cstr)+1);
     while(1){
  
       cv::Mat frame;
@@ -112,8 +124,8 @@ int main(int argc, char** argv)
 	  unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
 	  // cout << "C++ size ::::::::: size of BOX :::::::: " << sizeof(box) << endl;
 	  // total_box += box;
-	      // strcat(total_box, box);
-	    // fwrite(box, 24,1,stdout);
+	  // strcat(total_box, box);
+	  // fwrite(box, 24,1,stdout);
 	  write(fd, box, sizeof(item));
 	  
 	  // fwrite(newbox, sizeof(newbox), 1,stdout);

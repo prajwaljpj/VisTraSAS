@@ -14,3 +14,4 @@ python/test.py
 /build/
 /install/
 /python/__pycache__/
+/segments/test_seg/

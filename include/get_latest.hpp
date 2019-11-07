@@ -6,5 +6,5 @@
 
 namespace fs = boost::filesystem;
 
-std::string latestFile(std::string dirPath);
+fs::path latestFile(std::string dirPath);
 void check_and_delete(std::string dirPath);
