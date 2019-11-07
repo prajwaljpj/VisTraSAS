@@ -146,10 +146,10 @@ done
 
 
 # when link is provided uncomment
-ffmpeg -i "rtsp link" -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$1/rtsp_%Y-%m-%d-_%H-%M-%S.flv &
+# ffmpeg -i "rtsp link" -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$1/rtsp_%Y-%m-%d-_%H-%M-%S.flv &
 
 
-export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
+# export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
 
 # checking if in python env
 
@@ -164,10 +164,13 @@ fi
 
 # checking if engine file is present
 
-if [ ! -f "$ENGINE"]; then
+if [ ! -f $ENGINE ]; then
     ###### TODO ASSUME ENGINE IS CREATED
     ./install/createEngine --caffe-model=$CAFFE_MODEL --prototxt=$CAFFE_PROTO 
 fi
 
-./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH
+./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
+
+echo $PIPE_PATH $LINE_COORD $CAM_PARAM
+
 python3 main.py --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM $PIPE_PATH

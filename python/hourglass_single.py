@@ -3,34 +3,32 @@ import sys
 
 # sys.path.insert(0, 'home/shantam/alexDarknet/darknet/hourglass/')
 # sys.path.insert(0, 'home/shantam/alexDarknet/darknet/hourglass/pose')
-	
+sys.path.insert(0, "/home/rbccps2080ti/projects/VisTraSAS/pytorch-pose")
 import os
-import argparse
-import time
-import matplotlib.pyplot as plt
+# import argparse
+# import time
+# import matplotlib.pyplot as plt
 
 import torch
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
-import torchvision.datasets as datasets
+# import torchvision.datasets as datasets
 
-import _init_paths
-#from pose import Bar
-from hourglass.pose.utils.logger import Logger, savefig
-from hourglass.pose.utils.evaluation import accuracy, AverageMeter, final_preds
+# from hourglass.pose.utils.logger import Logger, savefig
+from pose.utils.evaluation import final_preds
 
-from hourglass.pose.utils.misc import save_checkpoint, save_pred, adjust_learning_rate
-from hourglass.pose.utils.osutils import mkdir_p, isfile, isdir, join
-from hourglass.pose.utils.imutils import batch_with_heatmap, im_to_numpy
-from hourglass.pose.utils.transforms import fliplr, flip_back
-import hourglass.pose.models as models
-import hourglass.pose.datasets as datasets
-import hourglass.pose.losses as losses
+# from hourglass.pose.utils.misc import save_checkpoint, save_pred, adjust_learning_rate
+# from hourglass.pose.utils.osutils import mkdir_p, isfile, isdir, join
+# from hourglass.pose.utils.imutils import batch_with_heatmap, im_to_numpy
+# from hourglass.pose.utils.transforms import fliplr, flip_back
+import pose.models as models
+# import hourglass.pose.datasets as datasets
+import pose.losses as losses
 
-from hourglass.pose.utils.transforms import *
+from pose.utils.transforms import *
 
-import cv2, nonechucks as nc, numpy as np 
+import cv2, numpy as np 
 
 def highest(scores, values):
 		maxval = np.amax(values)
@@ -82,7 +80,8 @@ class Hourglass():
 		self.criterion = losses.JointsMSELoss().to(self.device)
 		self.optimizer = torch.optim.RMSprop(self.model.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
 
-		self.checkpoint = torch.load("/home/shantam/Documents/Programs/hourglass/checkpoint/mpii/hg_updated_21/checkpoint.pth.tar")
+                # TODO changing hardcoded model path to parser
+		self.checkpoint = torch.load("/home/rbccps2080ti/projects/VisTraSAS/models/hourglass_checkpoint.pth.tar") 
 		self.start_epoch = self.checkpoint['epoch']
 		self.model.load_state_dict(self.checkpoint['state_dict'])
 		self.model.eval()

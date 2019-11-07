@@ -6,6 +6,7 @@ import cv2
 import configparser
 import argparse
 import json
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
 from python.super_frame import SuFrame
@@ -27,10 +28,10 @@ class Analytics(object):
         parser = configparser.SafeConfigParser()
         parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
         with open(self.line_coordinates_path, 'r') as lcp:
-            lc = json.loads(lcp)
+            lc = json.loads(lcp.read())
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
         with open(self.camera_intrinsics_file, 'r') as cif:
-            self.camera_intrinsics = json.loads(cif)
+            self.camera_intrinsics = json.loads(cif.read())
 
 
     # def get_latest(self, segment_path):
@@ -72,8 +73,9 @@ class Analytics(object):
     def run_analytics(self):
         while(True):
             DeepSort = deepsort_tracker()
+            print("finished deepsort tracker init")
             counter = counts(self.line_coordinates)
-            # TODO add camera intrinsics and extract model in vehicle speeds
+            #  add camera intrinsics and extract model in vehicle speeds
             speeder = VehicleSpeed(self.camera_intrinsics)
             frame_number = 1
             # latest_video = self.get_video_to_process()
@@ -89,6 +91,7 @@ class Analytics(object):
                 ret, frame = cap.read()
                 if not ret:
                     break
+                print("image Size :::", frame.size())
 
                 sframe = SuFrame(frame)
 
@@ -135,7 +138,7 @@ if __name__ == "__main__":
                           type=str,
                           help='Location of the pipe buffer (default:/tmp/fifopipe)')
     agparser.add_argument('--line_coordinates', metavar='l',
-                          default="configs/line_coord/test_cam.json"
+                          default="configs/line_coord/test_cam.json",
                           type=lambda x: is_valid_file(agparser, x),
                           help='Path to the line points json file for the \
                           correesponding stream')

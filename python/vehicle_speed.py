@@ -7,8 +7,7 @@ import time, math
 import numpy as np
 from scipy.optimize import least_squares, leastsq 
 # from auto_track import analytics_rbc
-import hourglass_single #.example.hourglass_single #import hourglass
-import super_frame
+from python.hourglass_single import * #.example.hourglass_single #import hourglass
 
 weights = np.ones((48))
 
@@ -16,7 +15,9 @@ class VehicleSpeed:
 
     def __init__(self, camera_mat):
 
-        self.model = hourglass_single.Hourglass()
+        self.camera_mat = camera_mat
+        print(self.camera_mat)
+        self.model = Hourglass()
         self.tracked = []
         self.last = []
         self.tracking = []
@@ -27,8 +28,8 @@ class VehicleSpeed:
         self.found = 0
         self.t = 1.0/20.0 #45.0/900.0#25.0/497.0#10.0/191.0#7.0/125.0
 
-        self.mtx = camera_mat['camera_matrix']
-        self.dist = camera_mat['dist_coeff']
+        self.mtx = self.camera_mat['camera_matrix']
+        self.dist = self.camera_mat['dist_coeff']
 
 
 

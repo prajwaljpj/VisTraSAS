@@ -1,6 +1,6 @@
-import defaultdict
+from collections import  defaultdict
 import configparser
-from deepsort import deepsort_tracker
+from python.deepsort import deepsort_tracker
 
 
 class counts(object):
@@ -11,7 +11,7 @@ class counts(object):
         super(counts, self).__init__()
         self.line_coord = line_coord
         parser = configparser.SafeConfigParser()
-        _ = parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
+        _ = parser.read("configs/global.cfg")
         self.yolo_model = parser.get("Yolo", "model_path")
         classes_path = parser.get("general", "classes")
         with open(classes_path, "r") as cls_file:
@@ -91,9 +91,5 @@ class counts(object):
             classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
         self.count_id(bbox, id_num, classname, frame)   
-        return_dict = 
-        {
-            'up_count': self.v_count_up,
-            'down_count': self.v_count_down
-        }
+        return_dict = {'up_count': self.v_count_up, 'down_count': self.v_count_down}
         return return_dict
