@@ -10,11 +10,12 @@ class counts(object):
     def __init__(self, line_coord):
         super(counts, self).__init__()
         self.line_coord = line_coord
-        parser = configparser.SafeConfigParser()
-        _ = parser.read("configs/global.cfg")
-        self.yolo_model = parser.get("Yolo", "model_path")
-        classes_path = parser.get("general", "classes")
-        with open(classes_path, "r") as cls_file:
+        # parser = configparser.SafeConfigParser()
+        # _ = parser.read("configs/global.cfg")
+        # self.yolo_model = parser.get("Yolo", "model_path")
+        # classes_path = parser.get("general", "classes")
+        # TODO change hardcoded paths
+        with open("/home/rbccps2080ti/projects/VisTraSAS/configs/class.names", "r") as cls_file:
             self.classes = cls_file.readlines()
             self.classes = [nm.strip() for nm in self.classes]
         self.below_line = set()
@@ -82,14 +83,17 @@ class counts(object):
 
     def get_count(self, super_frame):
         frame = super_frame.get_image()
-        tracker = super_frame.get_tracker()
+        tracker = super_frame.get_trackers()
+        det_box = super_frame.get_
         for track in tracker:
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             bbox = track.to_tlbr()
+            print(bbox)
+            
             classname = track.classname()
             classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
-        self.count_id(bbox, id_num, classname, frame)   
+            self.count_id(bbox, id_num, classname, frame)   
         return_dict = {'up_count': self.v_count_up, 'down_count': self.v_count_down}
         return return_dict

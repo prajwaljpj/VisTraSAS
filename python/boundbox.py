@@ -9,10 +9,11 @@ class Box(object):
 
     def __init__(self, box_tuple):
         super(Box, self).__init__()
-        parser = configparser.SafeConfigParser()
-        found = parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
-        classes = parser.get("general", "classes")
-        with open(classes, "r") as cls_file:
+        # parser = configparser.SafeConfigParser()
+        # found = parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
+        # classes = parser.get("general", "classes")
+        # TODO change hardcoded paths
+        with open("/home/rbccps2080ti/projects/VisTraSAS/configs/class.names", "r") as cls_file:
             cls_names = cls_file.readlines()
             cls_names = [nm.strip() for nm in cls_names]
         self.class_names_dict = {cls_names[i]: i for i in range(len(cls_names))}
@@ -69,7 +70,7 @@ class Box(object):
         return self.box_dict["class"]["class_id"]
 
     def ds_format(self):
-        op = (self.left(), self.top(), self.right()-self.left(), self.top()-self.bottom())
+        op = (self.left(), self.top(), self.right()-self.left(), self.bottom()-self.top())
         return op
 
 

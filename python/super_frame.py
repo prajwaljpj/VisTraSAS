@@ -45,8 +45,8 @@ class SuFrame(object):
         return self.set_HgPointers
 
     def get_image(self):
-        if not self.frame:
-            print("frame is black")
+        if self.frame is None:
+            print("No frame present")
             return None
         return self.frame
 
@@ -56,7 +56,7 @@ class SuFrame(object):
     def get_dets_dict(self):
         return [det.__dict__() for det in self.dets]
 
-    def get_scores(self, arg):
+    def get_scores(self):
         return [sc.class_confidence() for sc in self.dets]
 
     def get_class_ids(self):

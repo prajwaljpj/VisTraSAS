@@ -85,17 +85,19 @@ class Analytics(object):
             fifo_pipe = self.getboxval()
             lat_file = os.read(fifo_pipe, 28)
             print(len(lat_file))
-            # lat_file = lat_file.decode("utf-8")
+            lat_file = lat_file.decode("utf-8")
             print(lat_file)
-            if not os.path.exists(lat_file):
+            lat_file_path = os.path.join("./segments/test_cam", lat_file)
+            print(lat_file_path)
+            if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized")
                 sys.exit(0)
-            cap = cv2.VideoCapture(lat_file)
+            cap = cv2.VideoCapture(lat_file_path)
             while (cap.isOpened()):
                 ret, frame = cap.read()
                 if not ret:
                     break
-                print("image Size :::", frame.size())
+                print("image Size :::", frame.size)
 
                 sframe = SuFrame(frame)
 

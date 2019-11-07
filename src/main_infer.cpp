@@ -57,11 +57,13 @@ int main(int argc, char** argv)
     // unsigned char *lat_fil_cstr;
     cout << "before strcpy" << endl;
     // strcpy(lat_fil_cstr, lat_file_name.c_str());
-    const char* lat_fil_cstr = lat_file_name.c_str();
+    char* lat_fil_cstr = new char[lat_file_name.length()+1];
+    strcpy(lat_fil_cstr, lat_file_name.c_str());
     // unsigned char* lat_fil_cstr = reinterpret_cast<unsigned char*>(lat_file_name.c_str()); 
     cout << "latest file strcpy :: " << lat_fil_cstr << endl;
     cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
-    write(fd, &lat_fil_cstr, strlen(lat_fil_cstr)+1);
+    write(fd, lat_fil_cstr, strlen(lat_fil_cstr)+1);
+    delete [] lat_fil_cstr;
     while(1){
  
       cv::Mat frame;

@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import sys
 import configparser
+import cv2
 sys.path.insert(0, "/home/rbccps2080ti/projects/VisTraSAS/deep_sort")
 
 # from deep_sort.deep_sort.detection import Detection
@@ -65,16 +66,24 @@ class deepsort_tracker():
         out_scores = super_frame.get_scores()
         frame = super_frame.get_image()
         out_classes = super_frame.get_class_names()
+        # cv2.imshow("asdf", frame)
+        # cv2.waitKey(0)
+        print(bbox)
+        print(out_scores)
+        print(out_classes)
 
         detections = np.array(bbox)
+        print(detections)
         features = self.encoder(frame, detections.copy())
+        print("feat done")
+        print(len(features))
         #features = self.encoder.extract_features(frame,detections)
 
         # print(frame.shape)
 
-        detections = [Detection(bbox, score, feature, classname)
-                      for bbox, score, feature, classname in
-                      zip(detections, out_scores, features, out_classes)]
+        detections = [Detection(bbox, score, feature)
+                      for bbox, score, feature in
+                      zip(detections, out_scores, features)]
 
         outboxes = np.array([d.tlwh for d in detections])
 
