@@ -1,6 +1,7 @@
 from collections import  defaultdict
 import configparser
 from python.deepsort import deepsort_tracker
+import cv2
 
 
 class counts(object):
@@ -84,16 +85,18 @@ class counts(object):
     def get_count(self, super_frame):
         frame = super_frame.get_image()
         tracker = super_frame.get_trackers()
-        det_box = super_frame.get_
+        # det_box = super_frame.get_dets_tlbr()
+        # print("detections of super frame in tlbr: ", det_box)
         for track in tracker:
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             bbox = track.to_tlbr()
             print(bbox)
             
-            classname = track.classname()
-            classname = classname.decode('utf8').strip('\r')
+            classname = track.classname
+            print(classname)
+            # classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
-            self.count_id(bbox, id_num, classname, frame)   
+            self.count_id(bbox, id_num, classname, frame)  
         return_dict = {'up_count': self.v_count_up, 'down_count': self.v_count_down}
         return return_dict

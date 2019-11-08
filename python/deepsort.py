@@ -81,9 +81,9 @@ class deepsort_tracker():
 
         # print(frame.shape)
 
-        detections = [Detection(bbox, score, feature)
-                      for bbox, score, feature in
-                      zip(detections, out_scores, features)]
+        detections = [Detection(bbox, score, feature, classname)
+                      for bbox, score, feature, classname in
+                      zip(detections, out_scores, features, out_classes)]
 
         outboxes = np.array([d.tlwh for d in detections])
 

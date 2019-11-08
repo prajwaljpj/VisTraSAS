@@ -53,6 +53,11 @@ class SuFrame(object):
     def get_dets(self):
         return self.dets
 
+    def get_dets_tlbr(self):
+        return [[detection_bbox.top(), detection_bbox.left(),
+                 detection_bbox.bottom(), detection_bbox.right()]
+                for detection_bbox in self.dets]
+
     def get_dets_dict(self):
         return [det.__dict__() for det in self.dets]
 
