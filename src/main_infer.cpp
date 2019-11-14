@@ -13,6 +13,15 @@
 
 using namespace std;
 
+
+list<vector<Bbox>> get_batch_frame(list<string> data_list)
+{
+  for list<string>::const_iterator i = data_list.begin(); i != data_list.endl(); i++)
+  {
+
+  }
+}
+
 int main(int argc, char** argv)
 { 
   if (argc < 4)
@@ -34,11 +43,11 @@ int main(int argc, char** argv)
   /* write message to the FIFO */
   fd = open(myfifo, O_WRONLY);
   // cout << "C++ side ::::::::: Connected\n";
-  
+  string dir_path = argv[3];
 
   while (1) {
     // Get list of videos realtime
-    string dir_path = argv[3];
+    
     fs::path latest_file = latestFile(dir_path);
     string lat_file_path = latest_file.string();
     string lat_file_name = latest_file.filename().string();
@@ -81,7 +90,7 @@ int main(int argc, char** argv)
       frame_num++;
       
 
-      vector<Bbox> op1 = iff.infer_single_image(frame);
+      vector<Bbox> op1 = iff.infer(frame);
       frame.release();
 
       if (op1.empty())
@@ -106,36 +115,36 @@ int main(int argc, char** argv)
       // auto i = 0;
 	
       for(const auto& item : op1)  
-	{
-	  // cout << "C++ side ::::::::: size of item ::::::::: " << sizeof(item) << endl;
-	  // string newbox = reinterpret_cast<string>(item);
-	  // char* box = const_cast<char*>(reinterpret_cast<const char*>(&item));
-	  // string box_s(box);
-	  // if (first) {
-	  //   // strcpy(total_box, box);
-	  //   memcpy(total_box, box, 24);
-	  //   cout << "C++ side ::::::::: size of box ::::::::: " << sizeof(box) << endl;
-	  //   first = false;
-	  // }
-	  // else 
-	  //   memcpy(total_box+(24*i), box, 24);
-	  // i++;
-	  // cout << "C++ side ::::::::: class=" << item.classId << " prob=" << item.score*100 << endl;  
-	  // cout << "C++ side ::::::::: left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;  
+	  {
+	    // cout << "C++ side ::::::::: size of item ::::::::: " << sizeof(item) << endl;
+	    // string newbox = reinterpret_cast<string>(item);
+	    // char* box = const_cast<char*>(reinterpret_cast<const char*>(&item));
+	    // string box_s(box);
+	    // if (first) {
+	    //   // strcpy(total_box, box);
+	    //   memcpy(total_box, box, 24);
+	    //   cout << "C++ side ::::::::: size of box ::::::::: " << sizeof(box) << endl;
+	    //   first = false;
+	    // }
+	    // else 
+	    //   memcpy(total_box+(24*i), box, 24);
+	    // i++;
+	    // cout << "C++ side ::::::::: class=" << item.classId << " prob=" << item.score*100 << endl;  
+	    // cout << "C++ side ::::::::: left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;  
 
-	  unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
-	  // cout << "C++ size ::::::::: size of BOX :::::::: " << sizeof(box) << endl;
-	  // total_box += box;
-	  // strcat(total_box, box);
-	  // fwrite(box, 24,1,stdout);
-	  write(fd, box, sizeof(item));
+	    unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
+	    // cout << "C++ size ::::::::: size of BOX :::::::: " << sizeof(box) << endl;
+	    // total_box += box;
+	    // strcat(total_box, box);
+	    // fwrite(box, 24,1,stdout);
+	    write(fd, box, sizeof(item));
 	  
-	  // fwrite(newbox, sizeof(newbox), 1,stdout);
-	}
-      // cout << "C++ side ::::::::: write finished" << endl;
-      // this_thread::sleep_for(chrono::seconds(1));
+	    // fwrite(newbox, sizeof(newbox), 1,stdout);
+	  }
+	// cout << "C++ side ::::::::: write finished" << endl;
+	// this_thread::sleep_for(chrono::seconds(1));
 
-    }
+      }
     check_and_delete(dir_path);
 
     }
