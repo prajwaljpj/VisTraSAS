@@ -4,8 +4,8 @@
 A complete system for the analysis of Indian Traffic Patterns
 
 Provides a novel approach to acquiring traffic counts and link speeds
-
-## Installation
+---
+## Prerequisite Installation
 0) The code was tested on Ubuntu 18.04
 1) First it is suggested to have your nvidia-drivers to be installed properly
 This can be checked by:
@@ -47,21 +47,32 @@ This can be checked by:
 	sudo apt-get install libboost-all-dev
 	```
 
-main.sh is the main file 
-it exports python path to the current to deepsort
+### Installation
+1) Create a build folder
+	```sh
+	mkdir build && cd build
+	```
+2) Compile and install
+	```sh
+	cmake ..
+	make -j8
+	make install
+	cd ..
+	```
 
 ### Creating model
 Run the following command after setting up:
-	```bash
+	```sh
 	./install/createEngine --caffemodel=./models/yolov3_traffic_final.caffemodel --prototxt=./models/yolov3_traffic_final.prototxt --input=./test/test.jpg --W=416 --H=416 --class=9
 	```
 	
 if you want batching, then run
-	```bash
+	```sh
 	./install/createEngine --caffemodel=./models/yolov3_traffic_final.caffemodel --prototxt=./models/yolov3_traffic_final.prototxt --input=./test/test.jpg --W=416 --H=416 --class=9 --batchsize=2
 	```
 
-This will create an engine file namely **yolov3_fp32.engine**
+This will create an engine file namely **yolov3_fp32.engine**.
+
 Move this engine file into the models folder
 
 ### Adjust Config
@@ -69,13 +80,13 @@ __NOT IMPLEMENTED YET__
 
 ### Run 
 Just run main.sh
-	```bash
+	```sh
 	./main.sh --engine=./models/yolov3_fp32.engine --pipe-path=/tmp/fifopipe1 --segment-path=./segments/test_cam/ --line-coord=./configs/line_coord/test_cam.json --intrinsics=./configs/cam_intrinsic/test_cam.json
 	```
 
 ## Results
 Soon to be out
-
+---
 ## Authors/Maintainers
 * Prajwal Rao - [prajwaljpj@gmail.com](mailto:prajwaljpj@gmail.com), [prajwalrao@iisc.ac.in](mailto:prajwalrao@iisc.ac.in)
 * Sadgun Srinivas - [sadgun.srinivas@gmail.com](mailto:sadgun.srinivas@gmail.com), [sadguns@iisc.ac.in](mailto:sadguns@iisc.ac.in)
