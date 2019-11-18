@@ -8,21 +8,21 @@
 #include <unistd.h>
 #include <string.h>
 #include <thread>
-#include<chrono>
+#include <chrono>
 #include "opencv2/opencv.hpp"
 
 using namespace std;
 
 
-list<vector<Bbox>> get_batch_frame(list<string> data_list)
-{
-  for list<string>::const_iterator i = data_list.begin(); i != data_list.endl(); i++)
-  {
+// list<vector<Bbox>> get_batch_frame(list<string> data_list)
+ // {
+ //   for list<string>::const_iterator i = data_list.begin(); i != data_list.endl(); i++)
+ //   {
+ //     cout << i << endl;
+ //   }
+ // }
 
-  }
-}
-
-int main(int argc, char** argv)
+  int main(int argc, char** argv)
 { 
   if (argc < 4)
     return -1;
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
     write(fd, lat_fil_cstr, strlen(lat_fil_cstr)+1);
     delete [] lat_fil_cstr;
     while(1){
- 
+      auto start_time = chrono::high_resolution_clock::now();
       cv::Mat frame;
       // Capture frame-by-frame
       cap >> frame;
@@ -143,8 +143,10 @@ int main(int argc, char** argv)
 	  }
 	// cout << "C++ side ::::::::: write finished" << endl;
 	// this_thread::sleep_for(chrono::seconds(1));
-
-      }
+      auto stop = chrono::high_resolution_clock::now();
+      auto duration = duration_cast<milliseconds>(stop - start);
+      cout << "Complete Inference time for one frame : " << duration.count() << "ms" << endl;
+    }
     check_and_delete(dir_path);
 
     }

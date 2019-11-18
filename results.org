@@ -1,0 +1,10 @@
+* Results
+** The Results for inference time and memory usage is given below
+| Model          | Batch size | Model Size | FPS (Avg) | Inf time (Avg) | End to end |
+|----------------+------------+------------+-----------+----------------+------------|
+| yolov3_fp32_b1 |          1 | 1396MiB    |        68 | 15ms           |            |
+| yolov3_fp32_b2 |          2 | 1170Mib    |        33 | 30ms           |            |
+| yolov3_fp32_b4 |          4 | 1546MiB    |        12 | 80ms           |            |
+|----------------+------------+------------+-----------+----------------+------------|
+** Anomaly for batch size 2
+** 

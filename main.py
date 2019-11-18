@@ -7,6 +7,7 @@ import configparser
 import argparse
 import json
 import sys
+import time
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
@@ -22,6 +23,7 @@ class Analytics(object):
     """
 
     def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file):
+        loading_time = time.time()
         super(Analytics, self).__init__()
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
@@ -33,32 +35,8 @@ class Analytics(object):
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
         with open(self.camera_intrinsics_file, 'r') as cif:
             self.camera_intrinsics = json.loads(cif.read())
-
-
-    # def get_latest(self, segment_path):
-    #     list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
-    #     latest_file = max(list_of_files, key=os.path.getctime)
-    #     return latest_file
-
-
-    # def get_video_to_process(self):
-    #     if not os.path.exists(self.segment_source):
-    #         os.mkdir(self.segment_source)
-    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-    #     sorted_list = sorted(list_of_files, key=os.path.getmtime)
-    #     if len(sorted_list) != 0:
-    #         latest_file = sorted_list[-1]
-    #         return latest_file
-    #     return []
-
-
-    # def check_and_delete(self):
-    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-    #     if len(list_of_files) > 10:
-    #         sorted_list = sorted(list_of_files, key=os.path.getmtime)
-    #         for segfile in sorted_list[:len(sorted_list)-2]:
-    #             os.remove(segfile)
-
+        load_duration = time.time() - loading_time
+        print("Analytics init time :", load_duration*1000, "ms")
 
     def getboxval(self):
         try:
@@ -69,7 +47,6 @@ class Analytics(object):
         fifo = os.open(self.pipe_path, os.O_RDONLY)
         # TODO add a functionality to close fifo pipe somehow
         return fifo
-
 
     def run_analytics(self):
         while(True):
@@ -84,20 +61,21 @@ class Analytics(object):
             # self.check_and_delete()
             fifo_pipe = self.getboxval()
             lat_file = os.read(fifo_pipe, 28)
-            print(len(lat_file))
+            # print(len(lat_file))
             lat_file = lat_file.decode("utf-8")
-            print(lat_file)
+            # print(lat_file)
             lat_file_path = os.path.join("./segments/test_cam", lat_file)
-            print(lat_file_path)
+            # print(lat_file_path)
             if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized")
                 sys.exit(0)
             cap = cv2.VideoCapture(lat_file_path)
             while (cap.isOpened()):
+                frame_time = time.time()
                 ret, frame = cap.read()
                 if not ret:
                     break
-                print("image Size :::", frame.size)
+                # print("image Size :::", frame.size)
 
                 sframe = SuFrame(frame)
 
@@ -121,16 +99,18 @@ class Analytics(object):
                 # yolo is done above
                 # deepsort
                 trackers = DeepSort.run_deep_sort(sframe)
-                print("trackers::", trackers)
+                # print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
                 # TODO add speeds module later
                 # vehicle_speeds = speeder.get_speed(sframe)
 
                 print("VC::", vehicle_counts)
                 # print("VS::", vehicle_speeds)
+                frame_duration = time.time() - frame_time
+                print("Per frame counting time is :", frame_duration*1000, "ms")
             cap.release()
 
-            
+
 def is_valid_file(agparser, ags):
     if not os.path.exists(ags):
         agparser.error("The file %s does not exist!" % ags)
