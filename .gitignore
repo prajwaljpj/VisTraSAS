@@ -16,3 +16,4 @@ python/test.py
 /python/__pycache__/
 /segments/test_seg/
 /*.jpg
+/results.org~
