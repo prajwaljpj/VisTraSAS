@@ -15,6 +15,7 @@ from python.super_frame import SuFrame
 from python.deepsort import deepsort_tracker
 from python.line_counts import counts
 # from python.vehicle_speed import VehicleSpeed
+from KyuLength import q_det_class
 
 
 class Analytics(object):
@@ -22,12 +23,13 @@ class Analytics(object):
 
     """
 
-    def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file):
+    def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file, qlen_conf):
         load_start = time.time()
         super(Analytics, self).__init__()
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
         self.camera_intrinsics_file = camera_intrinsics_file
+        self.qlen_conf = qlen_conf
         parser = configparser.SafeConfigParser()
         parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
         with open(self.line_coordinates_path, 'r') as lcp:
@@ -37,6 +39,16 @@ class Analytics(object):
             self.camera_intrinsics = json.loads(cif.read())
         load_duration = time.time() - load_start
         print("Time taken for Init side of python : ", load_duration*1000, "ms")
+        with open(self.qlen_conf, 'r') as conf_q:
+            qlc = json.loads(conf_q.read())
+        mask_path = qlc["mask_path"]
+        self.imgcoord = qlc["image_array"]
+        self.worldcoord = qlc["world_array"]
+        self.qscale = qlc["scale"]
+        self.mask_img = cv2.imread(mask_path, 0)
+        if self.mask_img is None:
+            print("got mask image as :", self.mask_img)
+            sys.exit(0)
 
 
     # def get_latest(self, segment_path):
@@ -80,6 +92,8 @@ class Analytics(object):
             DeepSort = deepsort_tracker()
             # print("finished deepsort tracker init")
             counter = counts(self.line_coordinates)
+            # TODO add queue length initializer when its ready
+            # qlen = q_det_class.q_lenner(self.mask_img, self.imgcoord, self.worldcoord, self.qscale)
             #  add camera intrinsics and extract model in vehicle speeds
             # TODO add speed module later
             # speeder = VehicleSpeed(self.camera_intrinsics)
@@ -128,6 +142,8 @@ class Analytics(object):
                 trackers = DeepSort.run_deep_sort(sframe)
                 # print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
+                # TODO add q length runner after the code is fixed
+                # vehicle_qlen = qlen.run(sframe)
                 # TODO add speeds module later
                 # vehicle_speeds = speeder.get_speed(sframe)
 
@@ -160,9 +176,14 @@ if __name__ == "__main__":
                           default="configs/cam_intrinsic/test_cam.json",
                           type=lambda x: is_valid_file(agparser, x),
                           help='Camera intrinsics file path')
+    agparser.add_argument('--q_length_config', metavar='q',
+                          default="configs/qlen_conf/coord.json",
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='Camera Q length configuration file')
     args = agparser.parse_args()
 
     analytics = Analytics(args.pipe_path,
                           args.line_coordinates,
-                          args.camera_intrinsics_file)
+                          args.camera_intrinsics_file,
+                          args.q_length_config)
     analytics.run_analytics()

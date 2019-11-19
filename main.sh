@@ -17,6 +17,7 @@ while test $# -gt 0; do
 	    echo "-s, --segment-path=SEGMENT_PATH          Location of generated segments"
 	    echo "-l, --line-coord=LINE_COORD              Line coordinates for camera (specific to camera)"
 	    echo "-i, --intrinsics=CAM_PARAM               Camara Intrinsic parameters (specific to camera)"
+	    echo "-q, --qlength_conf=Q_CONF                Configuration json for qlength (specific to camera)"
 	    exit 0
 	    ;;
 	-e)
@@ -138,6 +139,20 @@ while test $# -gt 0; do
 	    export CAM_PARAM=`echo $1 | sed -e 's/^[^=]*=//g'`
 	    shift
 	    ;;
+	-q)
+	    shift
+	    if test $# -gt 0; then
+		export Q_CONF=$1
+	    else
+		echo "nocamera qlen config file"
+		exit 1
+	    fi
+	    shift
+	    ;;
+	--qlength_conf*)
+	    export Q_CONF=`echo $1 | sed -e 's/^[^=]*=//g'`
+	    shift
+	    ;;
 	*)
 	    break
 	    ;;
@@ -173,6 +188,6 @@ fi
 ./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
 # ./runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
 
-echo $PIPE_PATH $LINE_COORD $CAM_PARAM
+echo $PIPE_PATH $LINE_COORD $CAM_PARAM $Q_CONF
 
-python3 main.py --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM $PIPE_PATH
+python3 main.py --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH

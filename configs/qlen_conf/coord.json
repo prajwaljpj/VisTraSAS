@@ -1,0 +1,6 @@
+{
+    "mask_path" : "/home/rbccps2080ti/projects/VisTraSAS/configs/qlen_conf/outs_shaped.jpg",
+    "image_array" : [[1421,895],[1454,988],[1149,618],[1116,592],[772,785],[838,735]],
+    "world_array" : [[0.45, 15.8],[0,17],[4.5,2.2],[7.7,0],[7.5,12.4],[7.5,8.8]],
+    "scale" : 2.5
+}
