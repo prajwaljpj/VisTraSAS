@@ -7,6 +7,3 @@
 [submodule "pytorch-pose"]
 	path = pytorch-pose
 	url = https://github.com/prajwaljpj/pytorch-pose
-[submodule "Traffic-Queue-Length-and-Density"]
-	path = Traffic-Queue-Length-and-Density
-	url = https://github.com/prajwaljpj/Traffic-Queue-Length-and-Density
