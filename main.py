@@ -7,6 +7,7 @@ import configparser
 import argparse
 import json
 import sys
+import time
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
@@ -22,6 +23,7 @@ class Analytics(object):
     """
 
     def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file):
+        load_start = time.time()
         super(Analytics, self).__init__()
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
@@ -33,6 +35,8 @@ class Analytics(object):
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
         with open(self.camera_intrinsics_file, 'r') as cif:
             self.camera_intrinsics = json.loads(cif.read())
+        load_duration = time.time() - load_start
+        print("Time taken for Init side of python : ", load_duration*1000, "ms")
 
 
     # def get_latest(self, segment_path):
@@ -74,7 +78,7 @@ class Analytics(object):
     def run_analytics(self):
         while(True):
             DeepSort = deepsort_tracker()
-            print("finished deepsort tracker init")
+            # print("finished deepsort tracker init")
             counter = counts(self.line_coordinates)
             #  add camera intrinsics and extract model in vehicle speeds
             # TODO add speed module later
@@ -84,20 +88,21 @@ class Analytics(object):
             # self.check_and_delete()
             fifo_pipe = self.getboxval()
             lat_file = os.read(fifo_pipe, 28)
-            print(len(lat_file))
+            # print(len(lat_file))
             lat_file = lat_file.decode("utf-8")
-            print(lat_file)
+            # print(lat_file)
             lat_file_path = os.path.join("./segments/test_cam", lat_file)
-            print(lat_file_path)
+            # print(lat_file_path)
             if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized")
                 sys.exit(0)
             cap = cv2.VideoCapture(lat_file_path)
             while (cap.isOpened()):
+                frame_time = time.time()
                 ret, frame = cap.read()
                 if not ret:
                     break
-                print("image Size :::", frame.size)
+                # print("image Size :::", frame.size)
 
                 sframe = SuFrame(frame)
 
@@ -121,13 +126,15 @@ class Analytics(object):
                 # yolo is done above
                 # deepsort
                 trackers = DeepSort.run_deep_sort(sframe)
-                print("trackers::", trackers)
+                # print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
                 # TODO add speeds module later
                 # vehicle_speeds = speeder.get_speed(sframe)
 
-                print("VC::", vehicle_counts)
+                # print("VC::", vehicle_counts)
                 # print("VS::", vehicle_speeds)
+                frame_duration = time.time() - frame_time
+                print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
             cap.release()
 
             

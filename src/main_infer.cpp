@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <thread>
-#include<chrono>
+#include <chrono>
 #include "opencv2/opencv.hpp"
 
 using namespace std;
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     write(fd, lat_fil_cstr, strlen(lat_fil_cstr)+1);
     delete [] lat_fil_cstr;
     while(1){
- 
+      auto start = chrono::high_resolution_clock::now();
       cv::Mat frame;
       // Capture frame-by-frame
       cap >> frame;
@@ -134,7 +134,9 @@ int main(int argc, char** argv)
 	}
       // cout << "C++ side ::::::::: write finished" << endl;
       // this_thread::sleep_for(chrono::seconds(1));
-
+      auto stop = chrono::high_resolution_clock::now();
+      auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
+      cout << "Duration for complete C++ side yolo inference : " << duration.count() << "ms" << endl;
     }
     check_and_delete(dir_path);
 

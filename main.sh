@@ -166,7 +166,8 @@ fi
 
 if [ ! -f $ENGINE ]; then
     ###### TODO ASSUME ENGINE IS CREATED
-    ./install/createEngine --caffe-model=$CAFFE_MODEL --prototxt=$CAFFE_PROTO 
+    # ./install/createEngine --caffe-model=$CAFFE_MODEL --prototxt=$CAFFE_PROTO
+    echo "Engine file not found, Attempting to create one"
 fi
 
 ./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &

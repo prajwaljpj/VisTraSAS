@@ -91,10 +91,10 @@ class counts(object):
             if not track.is_confirmed() or track.time_since_update > 1:
                 continue
             bbox = track.to_tlbr()
-            print(bbox)
+            # print(bbox)
             
             classname = track.classname
-            print(classname)
+            # print(classname)
             # classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
             self.count_id(bbox, id_num, classname, frame)  

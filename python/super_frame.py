@@ -12,9 +12,9 @@ class SuFrame(object):
 
     # set members 
     def set_dets(self, dets):
-        if not isinstance(dets, (tuple)):
-            print("ERROR: Wrong data type passed as argument, expected tuple got {}".format(type(dets)))
-        self.dets = dets 
+        # if not isinstance(dets, (tuple)):
+        #     print("ERROR: Wrong data type passed as argument, expected tuple got {}".format(type(dets)))
+        self.dets = dets
 
     def set_trackers(self, trackers):
         self.trackers = trackers
