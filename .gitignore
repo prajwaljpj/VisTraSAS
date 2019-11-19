@@ -15,3 +15,10 @@ python/test.py
 /install/
 /python/__pycache__/
 /segments/test_seg/
+/*.jpg
+/*.org
+/results.org~
+/*.pdf
+/*.tex
+/*.tex
+/results.tex~
