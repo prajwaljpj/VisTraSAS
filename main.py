@@ -139,21 +139,28 @@ class Analytics(object):
                 sframe.set_dets(detections)
                 # yolo is done above
                 # deepsort
-                trackers = DeepSort.run_deep_sort(sframe)
-                # print("trackers::", trackers)
-                vehicle_counts = counter.get_count(sframe)
-                # TODO add q length runner after the code is fixed
-                # vehicle_qlen = qlen.run(sframe)
-                # TODO add speeds module later
-                # vehicle_speeds = speeder.get_speed(sframe)
+                if frame_number % 1 == 0:
+                    trackers = DeepSort.run_deep_sort(sframe)
+                    for track in trackers:
+                        if not track.is_confirmed() or track.time_since_update > 1:
+                            continue
+                        bbox = track.to_tlbr()
+                        
+                    # print("trackers::", trackers)
+                    # vehicle_counts = counter.get_count(sframe)
+                    # TODO add q length runner after the code is fixed
+                    # vehicle_qlen = qlen.run(sframe)
+                    # TODO add speeds module later
+                    # vehicle_speeds = speeder.get_speed(sframe)
 
-                # print("VC::", vehicle_counts)
+                    # print("VC::", vehicle_counts)
                 # print("VS::", vehicle_speeds)
                 frame_duration = time.time() - frame_time
                 print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
             cap.release()
+            sys.exit(0)
 
-            
+
 def is_valid_file(agparser, ags):
     if not os.path.exists(ags):
         agparser.error("The file %s does not exist!" % ags)

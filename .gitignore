@@ -22,3 +22,7 @@ python/test.py
 /*.tex
 /*.tex
 /results.tex~
+/*.json
+/b1_count_inf.json~
+/b4_counts_inf.json~
+/configs/qlen_conf/coord.json~
