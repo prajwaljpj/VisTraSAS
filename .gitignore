@@ -26,3 +26,5 @@ python/test.py
 /b1_count_inf.json~
 /b4_counts_inf.json~
 /configs/qlen_conf/coord.json~
+/python/*.py#
+/src/*.cpp#
