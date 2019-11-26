@@ -145,9 +145,8 @@ class Analytics(object):
                         if not track.is_confirmed() or track.time_since_update > 1:
                             continue
                         bbox = track.to_tlbr()
-                        
                     # print("trackers::", trackers)
-                    # vehicle_counts = counter.get_count(sframe)
+                    vehicle_counts = counter.get_count(sframe)
                     # TODO add q length runner after the code is fixed
                     # vehicle_qlen = qlen.run(sframe)
                     # TODO add speeds module later
@@ -179,6 +178,7 @@ if __name__ == "__main__":
                           type=lambda x: is_valid_file(agparser, x),
                           help='Path to the line points json file for the \
                           correesponding stream')
+    
     agparser.add_argument('--camera_intrinsics_file', metavar='i',
                           default="configs/cam_intrinsic/test_cam.json",
                           type=lambda x: is_valid_file(agparser, x),
