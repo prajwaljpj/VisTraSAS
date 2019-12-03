@@ -1,5 +1,4 @@
 import os
-import glob
 import struct
 import errno
 import cv2
@@ -51,31 +50,6 @@ class Analytics(object):
             sys.exit(0)
 
 
-    # def get_latest(self, segment_path):
-    #     list_of_files = glob.glob(os.path.join(segment_path, "*.flv"))
-    #     latest_file = max(list_of_files, key=os.path.getctime)
-    #     return latest_file
-
-
-    # def get_video_to_process(self):
-    #     if not os.path.exists(self.segment_source):
-    #         os.mkdir(self.segment_source)
-    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-    #     sorted_list = sorted(list_of_files, key=os.path.getmtime)
-    #     if len(sorted_list) != 0:
-    #         latest_file = sorted_list[-1]
-    #         return latest_file
-    #     return []
-
-
-    # def check_and_delete(self):
-    #     list_of_files = glob.glob(os.path.join(self.segment_source, "*.flv"))
-    #     if len(list_of_files) > 10:
-    #         sorted_list = sorted(list_of_files, key=os.path.getmtime)
-    #         for segfile in sorted_list[:len(sorted_list)-2]:
-    #             os.remove(segfile)
-
-
     def getboxval(self):
         try:
             os.mkfifo(self.pipe_path)
@@ -123,7 +97,7 @@ class Analytics(object):
                 try:
                     head = os.read(fifo_pipe, 1)
                 except IOError:
-                    print("didnt get header for frame")
+                    print("didnt get HEADER for frame")
                     continue
                 head = int.from_bytes(head, "big")
                 frame_number += 1
@@ -139,24 +113,19 @@ class Analytics(object):
                 sframe.set_dets(detections)
                 # yolo is done above
                 # deepsort
-                if frame_number % 1 == 0:
-                    trackers = DeepSort.run_deep_sort(sframe)
-                    for track in trackers:
-                        if not track.is_confirmed() or track.time_since_update > 1:
-                            continue
-                        bbox = track.to_tlbr()
-                        
-                    # print("trackers::", trackers)
-                    # vehicle_counts = counter.get_count(sframe)
-                    # TODO add q length runner after the code is fixed
-                    # vehicle_qlen = qlen.run(sframe)
-                    # TODO add speeds module later
-                    # vehicle_speeds = speeder.get_speed(sframe)
+                trackers = DeepSort.run_deep_sort(sframe)
+                print("trackers::", trackers)
+                vehicle_counts = counter.get_count(sframe)
+                # TODO add q length runner after the code is fixed
+                # vehicle_qlen = qlen.run(sframe)
+                # TODO add speeds module later
+                # vehicle_speeds = speeder.get_speed(sframe)
 
-                    # print("VC::", vehicle_counts)
+                print("VC::", vehicle_counts)
                 # print("VS::", vehicle_speeds)
                 frame_duration = time.time() - frame_time
-                print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
+                print("Time taken for process of one frame python side :",
+                      frame_duration*1000, "ms")
             cap.release()
             sys.exit(0)
 
