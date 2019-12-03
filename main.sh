@@ -159,9 +159,9 @@ while test $# -gt 0; do
     esac
 done
 
-mkdir -p 
+mkdir -p segments/$SEGMENT_PATH
 # when link is provided uncomment
-# ffmpeg -i "rtsp link" -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$1/rtsp_%Y-%m-%d_%H-%M-%S.flv &
+# ffmpeg -i $2 -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
 
 
 # export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
