@@ -28,3 +28,8 @@ python/test.py
 /configs/qlen_conf/coord.json~
 /python/*.py#
 /src/*.cpp#
+/segments/new_vids/*.mp4
+/__pycache__/*.pyc
+/hourglass_single.py~
+/speed_estimate_class_updated3.py~
+/speed_run.py~

@@ -1,5 +1,4 @@
-from collections import  defaultdict
-import configparser
+from collections import defaultdict
 from python.deepsort import deepsort_tracker
 import cv2
 
