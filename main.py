@@ -15,6 +15,7 @@ from python.deepsort import deepsort_tracker
 from python.line_counts import counts
 # from python.vehicle_speed import VehicleSpeed
 from KyuLength import q_det_class
+from speed_estimate_class_updated3 import speed_estimation
 
 
 class Analytics(object):
@@ -38,6 +39,7 @@ class Analytics(object):
             self.camera_intrinsics = json.loads(cif.read())
         load_duration = time.time() - load_start
         print("Time taken for Init side of python : ", load_duration*1000, "ms")
+        # Q length part
         with open(self.qlen_conf, 'r') as conf_q:
             qlc = json.loads(conf_q.read())
         mask_path = qlc["mask_path"]
@@ -48,6 +50,8 @@ class Analytics(object):
         if self.mask_img is None:
             print("got mask image as :", self.mask_img)
             sys.exit(0)
+        # speed part
+        self.speeder = speed_estimation()
 
 
     def getboxval(self):
@@ -119,8 +123,10 @@ class Analytics(object):
                 # TODO add q length runner after the code is fixed
                 # vehicle_qlen = qlen.run(sframe)
                 # TODO add speeds module later
-                # vehicle_speeds = speeder.get_speed(sframe)
-
+                some_tracking_obj = self.speeder.speed_estimate(sframe)
+                cv2.imshow("frame", sframe.get_image())
+                cv2.waitKey(0)
+                print("some_tracking_object:::::::::", some_tracking_obj)
                 print("VC::", vehicle_counts)
                 # print("VS::", vehicle_speeds)
                 frame_duration = time.time() - frame_time

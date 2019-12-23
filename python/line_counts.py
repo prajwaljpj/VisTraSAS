@@ -1,7 +1,7 @@
-from collections import  defaultdict
+from collections import defaultdict
 import configparser
 from python.deepsort import deepsort_tracker
-import cv2
+# import cv2
 
 
 class counts(object):
@@ -38,7 +38,7 @@ class counts(object):
         except(ZeroDivisionError):
             print("coordinates give a point and not a line!!")
             exit(0)
-        #Determinant method
+        # Determinant method
         d = (point_cord[0]-xy0[0])*(xy1[1]-xy0[1]) - (point_cord[1] - xy0[1])*(xy1[0]-xy0[0])
         height, width = frame.shape[:2]
         y1old = xy0[1]
@@ -46,7 +46,7 @@ class counts(object):
         const = xy0[1]-(slope*xy0[0])
         y1new = int(slope*0 + const)
         y2new = int(slope*width + const)
-        cv2.line(frame, (0, y1new), (width, y2new), (0, 0, 0), 2)
+        # cv2.line(frame, (0, y1new), (width, y2new), (0, 0, 0), 2)
         d = (point_cord[0] - 0)*(y2new - y1new) - (point_cord[1] - y1new)*(width - 0)
         if (d == 0):
             return 0
@@ -57,10 +57,9 @@ class counts(object):
             # Below the line
             return -1
 
-
     def count_id(self, bbox, id_num, classname, frame):
         # line coordinates is of the format ((x1, y1), (x2, y2))
-        #Centroid
+        # Centroid
         bbox_hat = [int((bbox[0] + bbox[2])/2), int((bbox[1] + bbox[3])/2)]
 
         point_position = self.calc_line_point(bbox_hat, frame)
@@ -81,7 +80,6 @@ class counts(object):
             else:
                 self.below_line.add(id_num)
 
-
     def get_count(self, super_frame):
         frame = super_frame.get_image()
         tracker = super_frame.get_trackers()
@@ -92,11 +90,11 @@ class counts(object):
                 continue
             bbox = track.to_tlbr()
             # print(bbox)
-            
+
             classname = track.classname
             # print(classname)
             # classname = classname.decode('utf8').strip('\r')
             id_num = str(track.track_id)
-            self.count_id(bbox, id_num, classname, frame)  
+            self.count_id(bbox, id_num, classname, frame)
         return_dict = {'up_count': self.v_count_up, 'down_count': self.v_count_down}
         return return_dict
