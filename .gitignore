@@ -1,3 +1,4 @@
+*~
 /models/*
 /test/*
 /segments/*.flv
@@ -28,3 +29,5 @@ python/test.py
 /configs/qlen_conf/coord.json~
 /python/*.py#
 /src/*.cpp#
+/segments/new_vids/
+/__pycache__/
