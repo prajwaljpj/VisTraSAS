@@ -1,6 +1,5 @@
 from collections import defaultdict
 import configparser
-from python.deepsort import deepsort_tracker
 # import cv2
 
 
@@ -11,12 +10,12 @@ class counts(object):
     def __init__(self, line_coord):
         super(counts, self).__init__()
         self.line_coord = line_coord
-        # parser = configparser.SafeConfigParser()
-        # _ = parser.read("configs/global.cfg")
-        # self.yolo_model = parser.get("Yolo", "model_path")
-        # classes_path = parser.get("general", "classes")
+        parser = configparser.ConfigParser()
+        _ = parser.read("../configs/global.cfg")
+        self.yolo_model = parser.get("Yolo", "model_path")
+        classes_path = parser.get("general", "classes")
         # TODO change hardcoded paths
-        with open("/home/rbccps2080ti/projects/VisTraSAS/configs/class.names", "r") as cls_file:
+        with open(classes_path, "r") as cls_file:
             self.classes = cls_file.readlines()
             self.classes = [nm.strip() for nm in self.classes]
         self.below_line = set()
@@ -31,7 +30,7 @@ class counts(object):
 
     def calc_line_point(self, point_cord, frame):
         xy0, xy1 = self.line_coord
-        if((xy1[1]-xy0[1])==0 or (xy1[1]-xy0[1])==0):
+        if((xy1[1]-xy0[1]) == 0 or (xy1[1]-xy0[1]) == 0):
             print("coordinates give a point and not a line!!")
         try:
             slope = (xy1[1]-xy0[1])/(xy1[0]-xy0[0])

@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 import time
+# import pika
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
@@ -23,15 +24,19 @@ class Analytics(object):
 
     """
 
-    def __init__(self, pipe_path, line_coordinates_path, camera_intrinsics_file, qlen_conf):
+    def __init__(self, pipe_path, line_coordinates_path,
+                 camera_intrinsics_file, qlen_conf,
+                 segment_path):
         load_start = time.time()
         super(Analytics, self).__init__()
         self.pipe_path = pipe_path
         self.line_coordinates_path = line_coordinates_path
         self.camera_intrinsics_file = camera_intrinsics_file
         self.qlen_conf = qlen_conf
-        parser = configparser.SafeConfigParser()
-        parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
+        self.segment_path = segment_path
+        # self.connection = pika.BlockingConnection(pika.ConnectionParameters('video.iudx.org.in'))
+        parser = configparser.ConfigParser()
+        parser.read("../configs/global.cfg")
         with open(self.line_coordinates_path, 'r') as lcp:
             lc = json.loads(lcp.read())
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
@@ -83,7 +88,7 @@ class Analytics(object):
             # print(len(lat_file))
             lat_file = lat_file.decode("utf-8")
             # print(lat_file)
-            lat_file_path = os.path.join("./segments/test_cam", lat_file)
+            lat_file_path = os.path.join("./segments", self.segment_path, lat_file)
             # print(lat_file_path)
             if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized")
@@ -117,17 +122,20 @@ class Analytics(object):
                 sframe.set_dets(detections)
                 # yolo is done above
                 # deepsort
-                trackers = DeepSort.run_deep_sort(sframe)
-                print("trackers::", trackers)
+                _ = DeepSort.run_deep_sort(sframe)
+                # print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
                 # TODO add q length runner after the code is fixed
                 # vehicle_qlen = qlen.run(sframe)
                 # TODO add speeds module later
-                some_tracking_obj = self.speeder.speed_estimate(sframe)
-                cv2.imshow("frame", sframe.get_image())
-                cv2.waitKey(0)
-                print("some_tracking_object:::::::::", some_tracking_obj)
+                # some_tracking_obj = self.speeder.speed_estimate(sframe)
+                # cv2.imshow("frame", sframe.get_image())
+                # cv2.waitKey(0)
+                # print("some_tracking_object:::::::::", some_tracking_obj)
                 print("VC::", vehicle_counts)
+                op_dump = os.path.join("results/", self.segment_path, lat_file)
+                with open(op_dump, 'w') as json_file:
+                    json.dump(vehicle_counts, json_file)
                 # print("VS::", vehicle_speeds)
                 frame_duration = time.time() - frame_time
                 print("Time taken for process of one frame python side :",
@@ -162,10 +170,15 @@ if __name__ == "__main__":
                           default="configs/qlen_conf/coord.json",
                           type=lambda x: is_valid_file(agparser, x),
                           help='Camera Q length configuration file')
+    agparser.add_argument('--segment_path', metavar='q',
+                          default="segments/test_cam",
+                          type=lambda x: is_valid_file(agparser, x),
+                          help='The stream name for which the analytics should run')
     args = agparser.parse_args()
 
     analytics = Analytics(args.pipe_path,
                           args.line_coordinates,
                           args.camera_intrinsics_file,
-                          args.q_length_config)
+                          args.q_length_config,
+                          args.segment_path)
     analytics.run_analytics()

@@ -160,9 +160,9 @@ while test $# -gt 0; do
 done
 
 mkdir -p segments/$SEGMENT_PATH
+mkdir -p results/$SEGMENT_PATH
 # when link is provided uncomment
-# ffmpeg -i $2 -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
-
+ffmpeg -i $2 -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
 
 # export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
 
@@ -185,9 +185,19 @@ if [ ! -f $ENGINE ]; then
     echo "Engine file not found, Attempting to create one"
 fi
 
-./install/runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
-# ./runYolov3 $ENGINE $PIPE_PATH $SEGMENT_PATH &
+./install/runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMENT_PATH &
+# ./runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMENT_PATH &
 
 echo $PIPE_PATH $LINE_COORD $CAM_PARAM $Q_CONF
 
-python3 main.py --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH
+python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH &
+
+while true;
+do sleep 5;
+   FFMPEG_PROC="$(ps aux | grep  ffmpeg | grep test_cam | awk '{print $2}')"
+   if [ -z "$FFMPEG_PROC" ]
+then
+	ffmpeg -i $2 -framerate 25 -an -vcodec copy -f segment -segment_time 5 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
+   else echo "$SEGMENT_PATH stream stopped working at $(date)" >> stream_not_working.log
+   fi
+done

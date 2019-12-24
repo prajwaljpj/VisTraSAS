@@ -9,11 +9,11 @@ class Box(object):
 
     def __init__(self, box_tuple):
         super(Box, self).__init__()
-        # parser = configparser.SafeConfigParser()
-        # found = parser.read(["../configs/global.cfg", "../configs/Global.cfg", "../configs/globals.cfg"])
-        # classes = parser.get("general", "classes")
+        parser = configparser.SafeConfigParser()
+        found = parser.read("../configs/global.cfg")
+        classes = parser.get("general", "classes")
         # TODO change hardcoded paths
-        with open("/home/rbccps2080ti/projects/VisTraSAS/configs/class.names", "r") as cls_file:
+        with open(classes, "r") as cls_file:
             cls_names = cls_file.readlines()
             cls_names = [nm.strip() for nm in cls_names]
         self.class_names_dict = {cls_names[i]: i for i in range(len(cls_names))}
