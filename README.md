@@ -28,7 +28,8 @@ This can be checked by:
 	import cv2
 	cv2.__version__
 	```
-5) Install tensorflow-gpu==1.15.0
+5) Install tensorflow-gpu==1.14.0 
+__Does not work with tensorflow-gpu==1.15.0__ (You might Engine load failure even though engine is generated correctly)
 	```python3
 	import tensorflow as tf
 	tf.__version__
