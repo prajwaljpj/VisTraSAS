@@ -31,3 +31,10 @@ python/test.py
 /src/*.cpp#
 /segments/new_vids/
 /__pycache__/
+configs/global.cfg
+configs/line_coord/*
+*.engine
+*.log
+logs/*
+segments/*
+results/*

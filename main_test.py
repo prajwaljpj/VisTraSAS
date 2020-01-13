@@ -66,59 +66,21 @@ class Analytics(object):
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 raise
+        fifo = os.open(self.pipe_path, os.O_RDONLY)
         print("Pipe opened::::::::")
         # TODO add a functionality to close fifo pipe somehow
+        return fifo
 
-    def read_from_pipe(self, byte_len=1):
-        print(self.pipe_path)
-        popened = os.open(self.pipe_path, os.O_RDONLY)
-        pdat = os.read(popened, byte_len)
-#        popened.close()
-        os.close(popened)
-        return pdat
 
     def run_analytics(self):
-        # counter = counts(self.line_coordinates)
         fifo_pipe = self.getboxval()
-        # fifo = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''
-        logfile = open("logs/pylogfile.log", "w+")
+        logfile = open("logfile_py.log", "a+")
         while(True):
             print("inside run_analytics")
-            DeepSort = deepsort_tracker()
 
-            # print("finished deepsort tracker init")
-            counter = counts(self.line_coordinates)
-
-            # TODO add queue length initializer when its ready
-            # qlen = q_det_class.q_lenner(self.mask_img, self.imgcoord, self.worldcoord, self.qscale)
-            #  add camera intrinsics and extract model in vehicle speeds
-            # TODO add speed module later
-            # speeder = VehicleSpeed(self.camera_intrinsics)
-            frame_number = 1
-            # latest_video = self.get_video_to_process()
-            # self.check_and_delete()
-            #fifo_pipe = self.getboxval()
-
-            '''
-            lat_file = os.read(fifo_pipe, 28)
-            print(lat_file)
-            lat_file = lat_file.decode("utf-8")
-            '''
-
-#            try:
-#                head_same = os.read(fifo_pipe, 1)
-#            except IOError:
-#                print("didn't get HEADER for frame")
-#                continue
-#            head_same = int.from_bytes(head_same, "big")
-#            if head_same == 3:
-#                head_same = 0
-#                continue
-#
             try:
-                # lat_file = os.read(fifo_pipe, 28)
-                lat_file = self.read_from_pipe(28)
+                lat_file = os.read(fifo_pipe, 28)
                 print("lat_file received Python side",lat_file)
                 logfile.write("lat_file received Python side :: {}\n".format(lat_file))
                 lat_file = lat_file.decode("utf-8")
@@ -127,13 +89,12 @@ class Analytics(object):
                 print("didn't get latest file")
                 continue
 
-            #print("previous file name: {}".format(previous_file))
             print("latest file name: {}".format(lat_file))
             logfile.write("latest file name: {}\n".format(lat_file))
             lat_file_path = os.path.join("./segments", self.segment_path, lat_file)
 
             if not os.path.exists(lat_file_path):
-                print("The file has dissappeared in python, desynchronized:: The file required is: ", lat_file_path)
+                print("The file has dissappeared in python, desynchronized:: the file im looking for is ::", lat_file_path)
                 sys.exit(0)
             cap = cv2.VideoCapture(lat_file_path)
 
@@ -145,65 +106,37 @@ class Analytics(object):
                     print("continuing to next iter as no frame found at:", lat_file_path)
                     logfile.write("continuing to next iter as no frame found at: {}\n".format(lat_file_path))
                     break
-                # print("image Size :::", frame.size)
-
-                sframe = SuFrame(frame)
 
                 try:
-                    # head = os.read(fifo_pipe, 1)
-                    head = self.read_from_pipe()
+                    head = os.read(fifo_pipe, 1)
                     #print("pipe read::::::::::::::::")
                 except IOError:
                     print("didnt get HEADER for frame")
                     continue
                 head = int.from_bytes(head, "big")
                 logfile.write("head of frame :: {}\n".format(head))
-                print("FRAME NUMBER == ", frame_number)
-                logfile.write("FRAME NUMBER == {}\n".format(frame_number))
-                frame_number += 1
+                # frame_number += 1
+
                 if head == 0:
                     continue
 
-                detections = []
 
                 for i in range(head):
                     try:
-                        # data_bytes = os.read(fifo_pipe, 24)
-                        data_bytes = self.read_from_pipe(24)
+                        data_bytes = os.read(fifo_pipe, 24)
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:
                         print("Check: ",err)
                     logfile.write("bbox data recieved :: {}\n".format(data))
-
-                    # TODO MAJOR MODIFICATION, CHECK FOR LOGIC
-                    #if (data[0] < 0 or data[0] > 9):
-                    #    #print("Generating random box_tuple[0]")
-                    #    new_data = (random.randint(1,8), data[1], data[2], data[3], data[4], data[5])
-                    #else:
-                    #    new_data = data
-                    detections.append(Box(data))
-                    # detections.append(Box(new_data))
-                sframe.set_dets(detections)
-                # yolo is done above
-                # deepsort
-                _ = DeepSort.run_deep_sort(sframe)
-                # print("trackers::", trackers)
-                vehicle_counts = counter.get_count(sframe)
-                # TODO add q length runner after the code is fixed
-                # vehicle_qlen = qlen.run(sframe)
-                # TODO add speeds module later
-                # some_tracking_obj = self.speeder.speed_estimate(sframe)
-                # cv2.imshow("frame", sframe.get_image())
-                # cv2.waitKey(0)
-                # print("some_tracking_object:::::::::", some_tracking_obj)
-                #print("VC::", vehicle_counts)
-                op_dump = os.path.join("results/", self.segment_path, lat_file.split('.')[0]+'.json')
-                with open(op_dump, 'a+') as json_file:
-                    json.dump(vehicle_counts, json_file)
-                # print("VS::", vehicle_speeds)
-                frame_duration = time.time() - frame_time
-                #print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
+                    if (data[0] < 0 or data[0] > 9):
+                        new_data = (random.randint(1,8), data[1], data[2], data[3], data[4], data[5])
+                    else:
+                        new_data = data
+                # op_dump = os.path.join("results/", self.segment_path, lat_file.split('.')[0]+'.json')
+                # with open(op_dump, 'a+') as json_file:
+                #     json.dump(vehicle_counts, json_file)
+            logfile.write("\n\n\n+++I finished a file\n\n\n")
             cap.release()
         logfile.close()
 

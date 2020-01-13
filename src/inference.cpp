@@ -100,7 +100,7 @@ void Inference::DoNms(vector<Detection>& detections,int classes ,float nmsThresh
 
     auto t_end = chrono::high_resolution_clock::now();
     float total = chrono::duration<float, milli>(t_end - t_start).count();
-    cout << "Time taken for nms is " << total << " ms." << endl;
+    //cout << "Time taken for nms is " << total << " ms." << endl;
 }
 
 
@@ -172,9 +172,10 @@ bool Inference::loadTRTModel(string netname)
         net.reset(new trtNet(netname));
         assert(net->getBatchSize() == batchSize);
     }
-    else 
-      cerr << "no net present";
-    return false;
+    else{
+       cerr << "no net present";
+       return false;
+    }
     /* outputCount = net->getOutputSize()/sizeof(float); */
     /* outputData = make_unique<float[]>(outputCount); */
     return true;

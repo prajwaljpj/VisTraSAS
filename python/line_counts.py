@@ -11,7 +11,7 @@ class counts(object):
         super(counts, self).__init__()
         self.line_coord = line_coord
         parser = configparser.ConfigParser()
-        _ = parser.read("../configs/global.cfg")
+        _ = parser.read("./configs/global.cfg")
         self.yolo_model = parser.get("Yolo", "model_path")
         classes_path = parser.get("general", "classes")
         # TODO change hardcoded paths
@@ -59,7 +59,12 @@ class counts(object):
     def count_id(self, bbox, id_num, classname, frame):
         # line coordinates is of the format ((x1, y1), (x2, y2))
         # Centroid
-        bbox_hat = [int((bbox[0] + bbox[2])/2), int((bbox[1] + bbox[3])/2)]
+        #print("BBOX::",bbox)
+        try:
+            bbox_hat = [int((bbox[0] + bbox[2])/2), int((bbox[1] + bbox[3])/2)]
+        except ValueError:
+            print("NaNs detected, assigning bbox vals as [0,0]")
+            bbox_hat = [0,0]
 
         point_position = self.calc_line_point(bbox_hat, frame)
 

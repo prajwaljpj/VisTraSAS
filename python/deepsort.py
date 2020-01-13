@@ -4,7 +4,7 @@ import tensorflow as tf
 import sys
 import configparser
 import cv2
-sys.path.insert(0, "/home/rbccps2080ti/projects/VisTraSAS/deep_sort")
+sys.path.insert(0, "/home/rbccps/projects/VisTraSAS/deep_sort")
 
 # from deep_sort.deep_sort.detection import Detection
 # from deep_sort.application_util import visualization, preprocessing as prep
@@ -32,7 +32,7 @@ class deepsort_tracker():
         self.deepsort_model = parser.get("Deepsort", "model_path")
         # print(self.deepsort_model)
         self.encoder = generate_detections.create_box_encoder(
-            "/home/rbccps2080ti/projects/VisTraSAS/models/mars-small128.pb")
+            "/home/rbccps/projects/VisTraSAS/models/mars-small128.pb")
         # print("The model has been loaded")
         self.metric = nn_matching.NearestNeighborDistanceMetric(
             "cosine", .5, 100)

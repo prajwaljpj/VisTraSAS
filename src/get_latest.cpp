@@ -1,5 +1,4 @@
 #include "get_latest.hpp"
-
 fs::path latestFile(std::string dirPath){
 
   fs::path latest;
@@ -7,7 +6,7 @@ fs::path latestFile(std::string dirPath){
 
   for (auto&& entry : boost::make_iterator_range(fs::directory_iterator(dirPath), {})) {
     fs::path p = entry.path();
-    if (is_regular_file(p) && p.extension() == ".mp4") 
+    if (is_regular_file(p) && p.extension() == ".flv") 
       {
 	std::time_t timestamp = fs::last_write_time(p);
 	if (timestamp > latest_tm) {
@@ -17,11 +16,11 @@ fs::path latestFile(std::string dirPath){
       }
   }
   if (latest.empty()){
-    std::cout << "Nothing found\n";
+    //std::cout << "Nothing found\n";
     return latest;
   }
   else{
-    std::cout << "Last modified: " << latest << "\n";
+    //std::cout << "Last modified: " << latest << "\n";
     return latest;
   }
 }
