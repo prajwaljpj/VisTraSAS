@@ -87,7 +87,10 @@ int main(int argc, char** argv)
       previous_file = lat_file_name;
 */
     if (lat_file_name.compare(previous_file)==0)
+    // if (lat_file_name.compare(previous_file))
     {
+        // cout << "crucial change" << endl;
+        // logfile << "crucial change" << endl;
        //cout << "waiting for new file segment" << endl;
        // addition by sadgun starts 
        //char* lat_fil_cstr = new char[lat_file_name.length()+1];
@@ -101,9 +104,11 @@ int main(int argc, char** argv)
        // addition by sadgun ends
        continue;
     }
-    else 
+    else{
+        cout << "files are not the same, previous file is diff from lat_file" << endl;
+        logfile << "files are not the same, previous file is diff from lat_file" << endl;
        previous_file = lat_file_name;
-
+    }
     print_count = 0;
     cv::VideoCapture cap(lat_file_path);
     //cout << "videocap success" << endl;
@@ -113,7 +118,8 @@ int main(int argc, char** argv)
       continue;
     }
     //cout << "before strcpy" << endl;
-    char* lat_fil_cstr = new char[lat_file_name.length()+1];
+    // removed +1 for object creation
+    char* lat_fil_cstr = new char[lat_file_name.length()];
     strcpy(lat_fil_cstr, lat_file_name.c_str());
     cout << "latest file strcpy :: " << lat_fil_cstr << endl;
     logfile << "latest file strcpy :: " << lat_fil_cstr << endl;
@@ -129,8 +135,11 @@ int main(int argc, char** argv)
       auto start = chrono::high_resolution_clock::now();
       cv::Mat frame;
       cap >> frame;
-      if (frame.empty())
-	break;
+      if (frame.empty()){
+        cout << "the loop broke at frame " << frame_number-1 << endl;
+        logfile << "the loop broke at frame " << frame_number-1 << endl;
+	    break;
+      }
       frame_num++;
       //vector<Bbox> op1 = iff.infer_single_image(frame);
       vector<Bbox> op1;

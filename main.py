@@ -67,15 +67,17 @@ class Analytics(object):
             if oe.errno != errno.EEXIST:
                 raise
         print("Pipe opened::::::::")
+        fifo = os.open(self.pipe_path, os.O_RDONLY)
         # TODO add a functionality to close fifo pipe somehow
+        return fifo
 
-    def read_from_pipe(self, byte_len=1):
-        print(self.pipe_path)
-        popened = os.open(self.pipe_path, os.O_RDONLY)
-        pdat = os.read(popened, byte_len)
+    # def read_from_pipe(self, byte_len=1):
+        # print(self.pipe_path)
+        # popened = os.open(self.pipe_path, os.O_RDONLY)
+        # pdat = os.read(popened, byte_len)
 #        popened.close()
-        os.close(popened)
-        return pdat
+        # os.close(popened)
+        # return pdat
 
     def run_analytics(self):
         # counter = counts(self.line_coordinates)
@@ -117,8 +119,8 @@ class Analytics(object):
 #                continue
 #
             try:
-                # lat_file = os.read(fifo_pipe, 28)
-                lat_file = self.read_from_pipe(28)
+                lat_file = os.read(fifo_pipe, 28)
+                # lat_file = self.read_from_pipe(28)
                 print("lat_file received Python side",lat_file)
                 logfile.write("lat_file received Python side :: {}\n".format(lat_file))
                 lat_file = lat_file.decode("utf-8")
@@ -140,6 +142,16 @@ class Analytics(object):
             while (cap.isOpened()):
                 frame_time = time.time()
                 ret, frame = cap.read()
+                print("return value ---- ", ret)
+                logfile.write("return value ---- {}\n".format(ret))
+
+                if frame is None:
+                    print("Frame is None; for :: ", frame_number)
+                    logfile.write("Frame is None; for :: {}\n".format(frame_number))
+                    break
+
+                # print("frame_shape value ---- ", frame.shape)
+                # logfile.write("frame_shape value ---- {}\n".format(frame.shape))
 
                 if not ret:
                     print("continuing to next iter as no frame found at:", lat_file_path)
@@ -150,8 +162,8 @@ class Analytics(object):
                 sframe = SuFrame(frame)
 
                 try:
-                    # head = os.read(fifo_pipe, 1)
-                    head = self.read_from_pipe()
+                    head = os.read(fifo_pipe, 1)
+                    # head = self.read_from_pipe()
                     #print("pipe read::::::::::::::::")
                 except IOError:
                     print("didnt get HEADER for frame")
@@ -168,8 +180,8 @@ class Analytics(object):
 
                 for i in range(head):
                     try:
-                        # data_bytes = os.read(fifo_pipe, 24)
-                        data_bytes = self.read_from_pipe(24)
+                        data_bytes = os.read(fifo_pipe, 24)
+                        # data_bytes = self.read_from_pipe(24)
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:

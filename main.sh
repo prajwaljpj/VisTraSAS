@@ -176,7 +176,7 @@ done
 mkdir -p segments/$SEGMENT_PATH
 mkdir -p results/$SEGMENT_PATH
 # when link is provided uncomment
-ffmpeg -hide_banner -loglevel panic -i $RTSP_STRM -framerate 25 -an -vcodec copy -f segment -segment_time 200 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
+ffmpeg -hide_banner -loglevel panic -i $RTSP_STRM -framerate 25 -an -vcodec copy -f segment -segment_time 30 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
 
 # export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
 
@@ -206,7 +206,7 @@ echo $ENGINE
 
 echo $PIPE_PATH $LINE_COORD $CAM_PARAM $Q_CONF
 
-python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH 
+# python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH &
 
 # while true;
 # do sleep 5;
