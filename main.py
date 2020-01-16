@@ -60,16 +60,19 @@ class Analytics(object):
         # self.speeder = speed_estimation()
 
 
-    def getboxval(self):
+    def getboxval(self, logfile):
         try:
             os.mkfifo(self.pipe_path)
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 raise
         print("Pipe opened::::::::")
-        fifo = os.open(self.pipe_path, os.O_RDONLY)
+        current_time = time.time()*1000
+        print("Time for pipe check at {}\n".format(current_time))
+        logfile.write("Time for pipe check at {}\n".format(current_time)) 
+        # fifo = os.open(self.pipe_path, os.O_RDONLY)
         # TODO add a functionality to close fifo pipe somehow
-        return fifo
+        # return fifo
 
     # def read_from_pipe(self, byte_len=1):
         # print(self.pipe_path)
@@ -81,10 +84,11 @@ class Analytics(object):
 
     def run_analytics(self):
         # counter = counts(self.line_coordinates)
-        fifo_pipe = self.getboxval()
-        # fifo = os.open(self.pipe_path, os.O_RDONLY)
-        previous_file = ''
+        # fifo_pipe = self.getboxval()
         logfile = open("logs/pylogfile.log", "w+")
+        self.getboxval(logfile)
+        # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
+        previous_file = ''
         while(True):
             print("inside run_analytics")
             DeepSort = deepsort_tracker()
@@ -119,7 +123,12 @@ class Analytics(object):
 #                continue
 #
             try:
+                current_time = time.time()*1000
+                print("Read file name at {}\n".format(current_time))
+                logfile.write("Read file name at {}\n".format(current_time)) 
+                fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                 lat_file = os.read(fifo_pipe, 28)
+                os.close(fifo_pipe)
                 # lat_file = self.read_from_pipe(28)
                 print("lat_file received Python side",lat_file)
                 logfile.write("lat_file received Python side :: {}\n".format(lat_file))
@@ -130,7 +139,7 @@ class Analytics(object):
                 continue
 
             #print("previous file name: {}".format(previous_file))
-            print("latest file name: {}".format(lat_file))
+            print("latest file name: {}\n".format(lat_file))
             logfile.write("latest file name: {}\n".format(lat_file))
             lat_file_path = os.path.join("./segments", self.segment_path, lat_file)
 
@@ -162,7 +171,12 @@ class Analytics(object):
                 sframe = SuFrame(frame)
 
                 try:
+                    current_time = time.time()*1000
+                    print("Header read at {}\n".format(current_time))
+                    logfile.write("Header read at {}\n".format(current_time)) 
+                    fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                     head = os.read(fifo_pipe, 1)
+                    os.close(fifo_pipe)
                     # head = self.read_from_pipe()
                     #print("pipe read::::::::::::::::")
                 except IOError:
@@ -172,6 +186,8 @@ class Analytics(object):
                 logfile.write("head of frame :: {}\n".format(head))
                 print("FRAME NUMBER == ", frame_number)
                 logfile.write("FRAME NUMBER == {}\n".format(frame_number))
+                if frame_number <= 20:
+                    cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
                 frame_number += 1
                 if head == 0:
                     continue
@@ -180,7 +196,12 @@ class Analytics(object):
 
                 for i in range(head):
                     try:
+                        current_time = time.time()*1000
+                        print("BBox read at {}\n".format(current_time))
+                        logfile.write("BBox read at {}\n".format(current_time)) 
+                        fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                         data_bytes = os.read(fifo_pipe, 24)
+                        os.close(fifo_pipe)
                         # data_bytes = self.read_from_pipe(24)
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")

@@ -40,12 +40,15 @@ int main(int argc, char** argv)
       exit(EXIT_FAILURE);
     }
   const char* myfifo = named_pipe.c_str();
+  chrono::time_point<chrono::high_resolution_clock> timenow = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+  cout << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
+  logfile << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
   mkfifo(myfifo, 0666);
-  fd = open(myfifo, O_WRONLY);
-  if (fd==-1) {
-    cerr << "Failed to establish Pipe connection" << endl;
-    exit(EXIT_FAILURE);
-  }
+  // fd = open(myfifo, O_WRONLY);
+  // if (fd==-1) {
+  //   cerr << "Failed to establish Pipe connection" << endl;
+  //   exit(EXIT_FAILURE);
+  // }
   string dir_path = argv[3];
   if (dir_path.empty())
     {
@@ -125,7 +128,17 @@ int main(int argc, char** argv)
     logfile << "latest file strcpy :: " << lat_fil_cstr << endl;
     cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
     logfile << "latest file len :: " << strlen(lat_fil_cstr) << endl;
+    // changes made by prajwal
+    fd = open(myfifo, O_WRONLY);
+    if (fd==-1) {
+      cerr << "Failed to establish Pipe connection" << endl;
+      exit(EXIT_FAILURE);
+    }
+    auto filename_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+    cout << "Writing File at " << filename_time.time_since_epoch().count() << endl;
+    logfile << "Writing File at " << filename_time.time_since_epoch().count() << endl;
     write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    close(fd);
     delete [] lat_fil_cstr;
     auto frame_number = 1;
     while(1){
@@ -135,6 +148,11 @@ int main(int argc, char** argv)
       auto start = chrono::high_resolution_clock::now();
       cv::Mat frame;
       cap >> frame;
+      //if (frame_number-1 <= 20) {
+      //    std::ostringstream name;
+      //    name << "~/home/rbccps/saved_frames/cpp_frame_" << frame_number-1<<".jpg";
+      //cv::imwrite(name.str(), frame);
+      //}
       if (frame.empty()){
         cout << "the loop broke at frame " << frame_number-1 << endl;
         logfile << "the loop broke at frame " << frame_number-1 << endl;
@@ -154,7 +172,16 @@ int main(int argc, char** argv)
             logfile << "delim :: number :: " << op1.size() << endl;
             cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+            fd = open(myfifo, O_WRONLY);
+            if (fd==-1) {
+              cerr << "Failed to establish Pipe connection" << endl;
+              exit(EXIT_FAILURE);
+            }
+            auto headni_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+            cout << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
+            logfile << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
             write(fd, &delim_char, sizeof(delim_char));
+            close(fd);
             //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             continue;
       }
@@ -169,7 +196,16 @@ int main(int argc, char** argv)
           // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
 	      cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
 	      logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+          fd = open(myfifo, O_WRONLY);
+          if (fd==-1) {
+            cerr << "Failed to establish Pipe connection" << endl;
+            exit(EXIT_FAILURE);
+          }
+          auto headz_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+          cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+          logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
 	      write(fd, &delim_char, sizeof(delim_char));
+          close(fd);
 	      //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
 	      continue;
 	    }
@@ -181,7 +217,17 @@ int main(int argc, char** argv)
       // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
       cout << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
       logfile << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
+      fd = open(myfifo, O_WRONLY);
+      if (fd==-1) {
+        cerr << "Failed to establish Pipe connection" << endl;
+        exit(EXIT_FAILURE);
+      }
+
+      auto head_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+      cout << "Header written at " << head_time.time_since_epoch().count() << endl;
+      logfile << "Header written at " << head_time.time_since_epoch().count() << endl;
       write(fd, &delim_char, sizeof(delim_char));
+      close(fd);
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
 	  auto iterm=1;
       for(const auto& item : op1)  
@@ -198,7 +244,16 @@ int main(int argc, char** argv)
       logfile << "class=" << item.classId << " prob=" << item.score*100 << endl;
       cout << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
       logfile << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
+      fd = open(myfifo, O_WRONLY);
+      if (fd==-1) {
+        cerr << "Failed to establish Pipe connection" << endl;
+        exit(EXIT_FAILURE);
+      }
+      auto bbox_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+      cout << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
+      logfile << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
 	  write(fd, box, sizeof(item));
+      close(fd);
 	}
       auto stop = chrono::high_resolution_clock::now();
       auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
@@ -207,7 +262,7 @@ int main(int argc, char** argv)
     check_and_delete(dir_path);
     cap.release();
   }
-  close(fd);
+  // close(fd);
     unlink(myfifo);
     logfile.close();
     return 0;
