@@ -60,7 +60,7 @@ class Analytics(object):
         # self.speeder = speed_estimation()
 
 
-    def getboxval(self, logfile):
+    def getboxval(self):
         try:
             os.mkfifo(self.pipe_path)
         except OSError as oe:
@@ -69,7 +69,7 @@ class Analytics(object):
         print("Pipe opened::::::::")
         current_time = time.time()*1000
         print("Time for pipe check at {}\n".format(current_time))
-        logfile.write("Time for pipe check at {}\n".format(current_time)) 
+        # logfile.write("Time for pipe check at {}\n".format(current_time)) 
         # fifo = os.open(self.pipe_path, os.O_RDONLY)
         # TODO add a functionality to close fifo pipe somehow
         # return fifo
@@ -86,9 +86,10 @@ class Analytics(object):
         # counter = counts(self.line_coordinates)
         # fifo_pipe = self.getboxval()
         logfile = open("logs/pylogfile.log", "w+")
-        self.getboxval(logfile)
+        self.getboxval()
         # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING MAIN LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         while(True):
             print("inside run_analytics")
             DeepSort = deepsort_tracker()
@@ -124,10 +125,10 @@ class Analytics(object):
 #
             try:
                 current_time = time.time()*1000
-                print("Read file name at {}\n".format(current_time))
-                logfile.write("Read file name at {}\n".format(current_time)) 
                 fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                 lat_file = os.read(fifo_pipe, 28)
+                print("Read file name at {}\n".format(current_time))
+                logfile.write("Read file name at {}\n".format(current_time)) 
                 os.close(fifo_pipe)
                 # lat_file = self.read_from_pipe(28)
                 print("lat_file received Python side",lat_file)
@@ -137,6 +138,8 @@ class Analytics(object):
             except IOError:
                 print("didn't get latest file")
                 continue
+            except Exception as excp:
+                print("some other error ", excp)
 
             #print("previous file name: {}".format(previous_file))
             print("latest file name: {}\n".format(lat_file))
@@ -148,6 +151,7 @@ class Analytics(object):
                 sys.exit(0)
             cap = cv2.VideoCapture(lat_file_path)
 
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             while (cap.isOpened()):
                 frame_time = time.time()
                 ret, frame = cap.read()
@@ -172,10 +176,10 @@ class Analytics(object):
 
                 try:
                     current_time = time.time()*1000
-                    print("Header read at {}\n".format(current_time))
-                    logfile.write("Header read at {}\n".format(current_time)) 
                     fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                     head = os.read(fifo_pipe, 1)
+                    print("Header read at {}\n".format(current_time))
+                    logfile.write("Header read at {}\n".format(current_time)) 
                     os.close(fifo_pipe)
                     # head = self.read_from_pipe()
                     #print("pipe read::::::::::::::::")
@@ -194,43 +198,30 @@ class Analytics(object):
 
                 detections = []
 
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING BBOX LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 for i in range(head):
                     try:
                         current_time = time.time()*1000
-                        print("BBox read at {}\n".format(current_time))
-                        logfile.write("BBox read at {}\n".format(current_time)) 
                         fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                         data_bytes = os.read(fifo_pipe, 24)
+                        print("BBox read at {}\n".format(current_time))
+                        logfile.write("BBox read at {}\n".format(current_time)) 
                         os.close(fifo_pipe)
+                        print("BBox byte length {}\n".format(len(data_bytes)))
+                        logfile.write("BBox byte length {}\n".format(len(data_bytes))) 
                         # data_bytes = self.read_from_pipe(24)
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:
                         print("Check: ",err)
+                        logfile.write("ERROR: @@Struct couldnt be unpacked@@")
                     logfile.write("bbox data recieved :: {}\n".format(data))
 
-                    # TODO MAJOR MODIFICATION, CHECK FOR LOGIC
-                    #if (data[0] < 0 or data[0] > 9):
-                    #    #print("Generating random box_tuple[0]")
-                    #    new_data = (random.randint(1,8), data[1], data[2], data[3], data[4], data[5])
-                    #else:
-                    #    new_data = data
                     detections.append(Box(data))
                     # detections.append(Box(new_data))
                 sframe.set_dets(detections)
-                # yolo is done above
-                # deepsort
                 _ = DeepSort.run_deep_sort(sframe)
-                # print("trackers::", trackers)
                 vehicle_counts = counter.get_count(sframe)
-                # TODO add q length runner after the code is fixed
-                # vehicle_qlen = qlen.run(sframe)
-                # TODO add speeds module later
-                # some_tracking_obj = self.speeder.speed_estimate(sframe)
-                # cv2.imshow("frame", sframe.get_image())
-                # cv2.waitKey(0)
-                # print("some_tracking_object:::::::::", some_tracking_obj)
-                #print("VC::", vehicle_counts)
                 op_dump = os.path.join("results/", self.segment_path, lat_file.split('.')[0]+'.json')
                 with open(op_dump, 'a+') as json_file:
                     json.dump(vehicle_counts, json_file)

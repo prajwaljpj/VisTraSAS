@@ -10,6 +10,7 @@
 #include <string.h>
 #include <thread>
 #include <chrono>
+#include <errno.h>
 #include "opencv2/opencv.hpp"
 
 using namespace std;
@@ -68,43 +69,10 @@ int main(int argc, char** argv)
       }
     string lat_file_path = latest_file.string();
     string lat_file_name = latest_file.filename().string();
-    //cout << "latest_file_path " << lat_file_path << endl;
-    //cout << "C++ ----- latest_file_name " << lat_file_name << endl;
-    //cout << "C++ ----- previous_file_name " << previous_file << endl;
-/*
-    if (previous_file.empty())
-      {
-	previous_file = lat_file_name;
-      }
-    else if (lat_file_name.compare(previous_file)==0)
-      {
-        if (print_count % 500 == 0)
-          {
-            print_count = 0;
-            cout << "Waiting for new file segment" << endl;
-          }
-        print_count++;
-        continue;
-      }
-    else
-      previous_file = lat_file_name;
-*/
+
     if (lat_file_name.compare(previous_file)==0)
     // if (lat_file_name.compare(previous_file))
     {
-        // cout << "crucial change" << endl;
-        // logfile << "crucial change" << endl;
-       //cout << "waiting for new file segment" << endl;
-       // addition by sadgun starts 
-       //char* lat_fil_cstr = new char[lat_file_name.length()+1];
-       //strcpy(lat_fil_cstr, lat_file_name.c_str());
-       //cout << "latest file strcpy :: " << lat_fil_cstr << endl;
-       //write(fd, lat_fil_cstr, strlen(lat_fil_cstr)+1);
-       //delete [] lat_fil_cstr;
-//       char delim_char = '3';
-       //char delim_char = (unsigned char) 3;
- //     write(fd, &delim_char, sizeof(delim_char));
-       // addition by sadgun ends
        continue;
     }
     else{
@@ -120,8 +88,6 @@ int main(int argc, char** argv)
       //cout << "C++ side ::::::::: Error opening video stream or file" << endl;
       continue;
     }
-    //cout << "before strcpy" << endl;
-    // removed +1 for object creation
     char* lat_fil_cstr = new char[lat_file_name.length()];
     strcpy(lat_fil_cstr, lat_file_name.c_str());
     cout << "latest file strcpy :: " << lat_fil_cstr << endl;
@@ -137,7 +103,13 @@ int main(int argc, char** argv)
     auto filename_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
     cout << "Writing File at " << filename_time.time_since_epoch().count() << endl;
     logfile << "Writing File at " << filename_time.time_since_epoch().count() << endl;
-    write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    int w_success = write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    if (w_success < 0){
+        cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+        cout << strerror(errno);
+        logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+        logfile << strerror(errno);
+    }
     close(fd);
     delete [] lat_fil_cstr;
     auto frame_number = 1;
@@ -148,11 +120,11 @@ int main(int argc, char** argv)
       auto start = chrono::high_resolution_clock::now();
       cv::Mat frame;
       cap >> frame;
-      //if (frame_number-1 <= 20) {
-      //    std::ostringstream name;
-      //    name << "~/home/rbccps/saved_frames/cpp_frame_" << frame_number-1<<".jpg";
-      //cv::imwrite(name.str(), frame);
-      //}
+      if (frame_number-1 <= 20) {
+          std::ostringstream name;
+          name << "~/home/rbccps/saved_frames/cpp_frame_" << frame_number-1<<".jpg";
+      cv::imwrite(name.str(), frame);
+      }
       if (frame.empty()){
         cout << "the loop broke at frame " << frame_number-1 << endl;
         logfile << "the loop broke at frame " << frame_number-1 << endl;
@@ -180,7 +152,13 @@ int main(int argc, char** argv)
             auto headni_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
             cout << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
             logfile << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
-            write(fd, &delim_char, sizeof(delim_char));
+            int headni_succ = write(fd, &delim_char, sizeof(delim_char));
+            if (headni_succ < 0){
+                cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+                cout << strerror(errno);
+                logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+                logfile << strerror(errno);
+            }
             close(fd);
             //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             continue;
@@ -204,7 +182,13 @@ int main(int argc, char** argv)
           auto headz_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
           cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
           logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
-	      write(fd, &delim_char, sizeof(delim_char));
+	      int hz_succ = write(fd, &delim_char, sizeof(delim_char));
+          if (hz_succ < 0){
+              cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+              cout << strerror(errno);
+              logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+              logfile << strerror(errno);
+          }
           close(fd);
 	      //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
 	      continue;
@@ -226,12 +210,19 @@ int main(int argc, char** argv)
       auto head_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
       cout << "Header written at " << head_time.time_since_epoch().count() << endl;
       logfile << "Header written at " << head_time.time_since_epoch().count() << endl;
-      write(fd, &delim_char, sizeof(delim_char));
+      int head_succ = write(fd, &delim_char, sizeof(delim_char));
+      if (head_succ < 0){
+          cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          cout << strerror(errno);
+          logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          logfile << strerror(errno);
+      }
       close(fd);
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
 	  auto iterm=1;
       for(const auto& item : op1)  
 	{
+      this_thread::sleep_for(chrono::milliseconds(100));
       cout << "iterm ^^+++^^ :: " << iterm << endl;
       logfile << "iterm ^^+++^^ :: " << iterm << endl;
       iterm++;
@@ -252,8 +243,16 @@ int main(int argc, char** argv)
       auto bbox_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
       cout << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
       logfile << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
-	  write(fd, box, sizeof(item));
+      int box_succ = write(fd, box, sizeof(item));
+      if (box_succ < 0){
+          cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          cout << strerror(errno);
+          logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          logfile << strerror(errno);
+      }
+	  //write(fd, box, sizeof(box));
       close(fd);
+
 	}
       auto stop = chrono::high_resolution_clock::now();
       auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);
