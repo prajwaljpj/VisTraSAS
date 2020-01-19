@@ -15,6 +15,48 @@
 
 using namespace std;
 
+bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
+  int statusVal;
+  bool success=false;
+  statusVal = open(statFifo, O_WRONLY);
+  if(statusVal==-1){
+    cerr << "Failed to establish Pipe connection" << endl;
+    exit(EXIT_FAILURE);
+  }
+  int initWr = write(statFifo, &writeData, dataSize);
+  if (initWr==-1){
+    cerr << "failed to read Pipe Value" << endl;
+    exit(EXIT_FAILURE);
+  }
+  success=true;
+  return success;
+}
+
+bool readStatus(const char* statFifo, int readSize){
+  int statusVal;
+  bool success=false;
+  const char* readData[readSize];
+  statusVal = open(statFifo, O_RDONLY);
+  if(statusVal==-1){
+    cerr << "Failed to establish Pipe connection" << endl;
+    exit(EXIT_FAILURE);
+  }
+  int initRd = read(statFifo, &readData, readSize);
+  if (initRd==-1){
+    cerr << "failed to read Pipe Value" << endl;
+    exit(EXIT_FAILURE);
+  }
+  if((int)readData==1)
+    success=true;
+  else if ((int)readData==0)
+    success=false;
+  else {
+    cout << "CRITICAL ERROR:: READ DATA NON BINARY" << endl;
+    exit(EXIT_FAILURE);
+    }
+  return success;
+}
+
 int main(int argc, char** argv)
 { 
   ofstream logfile;
@@ -40,7 +82,14 @@ int main(int argc, char** argv)
       cerr << "Invalid PIPE Name" << endl;
       exit(EXIT_FAILURE);
     }
+  string sig_pipe = named_pipe + "_rev";
+  if (sig_pipe.empty())
+    {
+      cerr << "Invalid PIPE Name" << endl;
+      exit(EXIT_FAILURE);
+    }
   const char* myfifo = named_pipe.c_str();
+  const char* myfifo_rev = sig_pipe.c_str();
   chrono::time_point<chrono::high_resolution_clock> timenow = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
   cout << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
   logfile << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
@@ -58,14 +107,13 @@ int main(int argc, char** argv)
     }
 
   string previous_file;
-  int print_count = 0;
 
   while (1) {
     fs::path latest_file = latestFile(dir_path);
     if (latest_file.empty())
       {
-	//cerr << "Waiting for initial files" << endl;
-	continue;
+        //cerr << "Waiting for initial files" << endl;
+        continue;
       }
     string lat_file_path = latest_file.string();
     string lat_file_name = latest_file.filename().string();
@@ -78,9 +126,8 @@ int main(int argc, char** argv)
     else{
         cout << "files are not the same, previous file is diff from lat_file" << endl;
         logfile << "files are not the same, previous file is diff from lat_file" << endl;
-       previous_file = lat_file_name;
+        previous_file = lat_file_name;
     }
-    print_count = 0;
     cv::VideoCapture cap(lat_file_path);
     //cout << "videocap success" << endl;
     int frame_num = 0;
