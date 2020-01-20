@@ -15,6 +15,7 @@
 
 using namespace std;
 
+// TODO Remove exit failures
 bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
   int statusVal;
   bool success=false;
@@ -23,7 +24,7 @@ bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initWr = write(statFifo, &writeData, dataSize);
+  int initWr = write(statFifo, writeData, dataSize);
   if (initWr==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
@@ -32,7 +33,8 @@ bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
   return success;
 }
 
-bool readStatus(const char* statFifo, int readSize){
+// TODO Remove exit failures
+bool readStatus(const char* statFifo, size_t readSize){
   int statusVal;
   bool success=false;
   const char* readData[readSize];
@@ -41,7 +43,7 @@ bool readStatus(const char* statFifo, int readSize){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initRd = read(statFifo, &readData, readSize);
+  int initRd = read(statFifo, readData, readSize);
   if (initRd==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
       exit(EXIT_FAILURE);
     }
   const char* myfifo = named_pipe.c_str();
-  const char* myfifo_rev = sig_pipe.c_str();
+  // const char* myfifo_rev = sig_pipe.c_str();
   chrono::time_point<chrono::high_resolution_clock> timenow = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
   cout << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
   logfile << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
@@ -142,22 +144,30 @@ int main(int argc, char** argv)
     cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
     logfile << "latest file len :: " << strlen(lat_fil_cstr) << endl;
     // changes made by prajwal
-    fd = open(myfifo, O_WRONLY);
-    if (fd==-1) {
-      cerr << "Failed to establish Pipe connection" << endl;
-      exit(EXIT_FAILURE);
-    }
+    // fd = open(myfifo, O_WRONLY);
+    // if (fd==-1) {
+    //   cerr << "Failed to establish Pipe connection" << endl;
+    //   exit(EXIT_FAILURE);
+    // }
     auto filename_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
     cout << "Writing File at " << filename_time.time_since_epoch().count() << endl;
     logfile << "Writing File at " << filename_time.time_since_epoch().count() << endl;
-    int w_success = write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
-    if (w_success < 0){
-        cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-        cout << strerror(errno);
-        logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-        logfile << strerror(errno);
-    }
-    close(fd);
+    // int w_success = write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    // if (w_success < 0){
+    //     cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+    //     cout << strerror(errno);
+    //     logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE filename FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+    //     logfile << strerror(errno);
+    // }
+    // close(fd);
+    bool fileWriteStat = writeStatus(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    bool fileReadCorrectStat = readStatus(fd, 1);
+    cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
+    logfile << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
+    // while(!fileReadCorrectStat){
+    //   fileWriteStat = writeStatus(fd, lat_fil_cstr, strlen(lat_fil_cstr));
+    //   fileReadCorrectStat = readStatus(fd, 1);
+    // }
     delete [] lat_fil_cstr;
     auto frame_number = 1;
     while(1){
@@ -191,23 +201,26 @@ int main(int argc, char** argv)
             logfile << "delim :: number :: " << op1.size() << endl;
             cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
-            fd = open(myfifo, O_WRONLY);
-            if (fd==-1) {
-              cerr << "Failed to establish Pipe connection" << endl;
-              exit(EXIT_FAILURE);
-            }
+            // fd = open(myfifo, O_WRONLY);
+            // if (fd==-1) {
+            //   cerr << "Failed to establish Pipe connection" << endl;
+            //   exit(EXIT_FAILURE);
+            // }
             auto headni_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
             cout << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
             logfile << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
-            int headni_succ = write(fd, &delim_char, sizeof(delim_char));
-            if (headni_succ < 0){
-                cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-                cout << strerror(errno);
-                logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-                logfile << strerror(errno);
-            }
-            close(fd);
-            //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+            // int headni_succ = write(fd, &delim_char, sizeof(delim_char));
+            // if (headni_succ < 0){
+            //     cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+            //     cout << strerror(errno);
+            //     logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+            //     logfile << strerror(errno);
+            // }
+            // close(fd);
+            bool headniWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
+            bool headniReadCorrectStat = readStatus(fd, 1);
+            cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
+            logfile << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             continue;
       }
       frame.release();
@@ -221,23 +234,26 @@ int main(int argc, char** argv)
           // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
 	      cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
 	      logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
-          fd = open(myfifo, O_WRONLY);
-          if (fd==-1) {
-            cerr << "Failed to establish Pipe connection" << endl;
-            exit(EXIT_FAILURE);
-          }
+        // fd = open(myfifo, O_WRONLY);
+        // if (fd==-1) {
+        //   cerr << "Failed to establish Pipe connection" << endl;
+        //   exit(EXIT_FAILURE);
+        // }
           auto headz_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-          cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
-          logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
-	      int hz_succ = write(fd, &delim_char, sizeof(delim_char));
-          if (hz_succ < 0){
-              cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-              cout << strerror(errno);
-              logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-              logfile << strerror(errno);
-          }
-          close(fd);
-	      //cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+        // cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+        // logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+	      // int hz_succ = write(fd, &delim_char, sizeof(delim_char));
+        //if (hz_succ < 0){
+        //    cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+        //    cout << strerror(errno);
+        //    logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+        //    logfile << strerror(errno);
+        //}
+        //close(fd);
+        bool headzWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
+        bool headzReadCorrectStat = readStatus(fd, 1);
+        cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
+        logfile << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
 	      continue;
 	    }
       char delim_char = (unsigned char) op1.size();
@@ -248,32 +264,35 @@ int main(int argc, char** argv)
       // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
       cout << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
       logfile << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
-      fd = open(myfifo, O_WRONLY);
-      if (fd==-1) {
-        cerr << "Failed to establish Pipe connection" << endl;
-        exit(EXIT_FAILURE);
-      }
-
-      auto head_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+      // fd = open(myfifo, O_WRONLY);
+      // if (fd==-1) {
+      //   cerr << "Failed to establish Pipe connection" << endl;
+      //   exit(EXIT_FAILURE);
+      // }
+      auto head_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now());
       cout << "Header written at " << head_time.time_since_epoch().count() << endl;
       logfile << "Header written at " << head_time.time_since_epoch().count() << endl;
-      int head_succ = write(fd, &delim_char, sizeof(delim_char));
-      if (head_succ < 0){
-          cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-          cout << strerror(errno);
-          logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-          logfile << strerror(errno);
-      }
-      close(fd);
+      //int head_succ = write(fd, &delim_char, sizeof(delim_char));
+      //if (head_succ < 0){
+      //    cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+      //    cout << strerror(errno);
+      //    logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+      //    logfile << strerror(errno);
+      //}
+      //close(fd);
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
-	  auto iterm=1;
+      bool headWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
+      bool headReadCorrectStat = readStatus(fd, 1);
+      cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
+      logfile << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
+      auto iterm=1;
       for(const auto& item : op1)  
-	{
-      this_thread::sleep_for(chrono::milliseconds(100));
+        {
+      // this_thread::sleep_for(chrono::milliseconds(100));
       cout << "iterm ^^+++^^ :: " << iterm << endl;
       logfile << "iterm ^^+++^^ :: " << iterm << endl;
       iterm++;
-	  unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
+      unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
       cout << "box size :: " << sizeof(box) << endl;
       logfile << "box size :: " << sizeof(box) << endl;
       cout << "item size :: " << sizeof(item) << endl;
@@ -282,23 +301,27 @@ int main(int argc, char** argv)
       logfile << "class=" << item.classId << " prob=" << item.score*100 << endl;
       cout << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
       logfile << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
-      fd = open(myfifo, O_WRONLY);
-      if (fd==-1) {
-        cerr << "Failed to establish Pipe connection" << endl;
-        exit(EXIT_FAILURE);
-      }
-      auto bbox_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
+      // fd = open(myfifo, O_WRONLY);
+      // if (fd==-1) {
+      //   cerr << "Failed to establish Pipe connection" << endl;
+      //   exit(EXIT_FAILURE);
+      // }
+      auto bbox_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now());
       cout << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
       logfile << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
-      int box_succ = write(fd, box, sizeof(item));
-      if (box_succ < 0){
-          cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-          cout << strerror(errno);
-          logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
-          logfile << strerror(errno);
-      }
+      // int box_succ = write(fd, box, sizeof(item));
+      // if (box_succ < 0){
+          // cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          // cout << strerror(errno);
+          // logfile << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
+          // logfile << strerror(errno);
+      // }
 	  //write(fd, box, sizeof(box));
-      close(fd);
+      // close(fd);
+      bool bboxWriteStat = writeStatus(fd, box, sizeof(item));
+      bool bboxReadCorrectStat = readStatus(fd, 1);
+      cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
+      logfile << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
 
 	}
       auto stop = chrono::high_resolution_clock::now();
