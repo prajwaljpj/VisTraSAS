@@ -24,7 +24,25 @@ bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initWr = write(statFifo, writeData, dataSize);
+  int initWr = write(statusVal, writeData, dataSize);
+  if (initWr==-1){
+    cerr << "failed to read Pipe Value" << endl;
+    exit(EXIT_FAILURE);
+  }
+  success=true;
+  return success;
+}
+
+// TODO Remove exit Failures
+bool writeStatus(const char* statFifo, unsigned char* writeData, size_t dataSize){
+  int statusVal;
+  bool success=false;
+  statusVal = open(statFifo, O_WRONLY);
+  if(statusVal==-1){
+    cerr << "Failed to establish Pipe connection" << endl;
+    exit(EXIT_FAILURE);
+  }
+  int initWr = write(statusVal, writeData, dataSize);
   if (initWr==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
@@ -43,14 +61,16 @@ bool readStatus(const char* statFifo, size_t readSize){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initRd = read(statFifo, readData, readSize);
+  int initRd = read(statusVal, readData, readSize);
   if (initRd==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
   }
-  if((int)readData==1)
+  cout << "C++ LOG ## readData = " << readData << endl;
+  cout << "C++ LOG ## (int)readData = " << (int)**readData << endl;
+  if((int)**readData==1)
     success=true;
-  else if ((int)readData==0)
+  else if ((int)**readData==0)
     success=false;
   else {
     cout << "CRITICAL ERROR:: READ DATA NON BINARY" << endl;
@@ -77,7 +97,6 @@ int main(int argc, char** argv)
     exit(EXIT_FAILURE);
   }
   
-  int fd;
   string named_pipe = argv[2];
   if (named_pipe.empty())
     {
@@ -160,8 +179,8 @@ int main(int argc, char** argv)
     //     logfile << strerror(errno);
     // }
     // close(fd);
-    bool fileWriteStat = writeStatus(fd, lat_fil_cstr, strlen(lat_fil_cstr));
-    bool fileReadCorrectStat = readStatus(fd, 1);
+    (void)writeStatus(myfifo, lat_fil_cstr, strlen(lat_fil_cstr));
+    bool fileReadCorrectStat = readStatus(myfifo, 1);
     cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     logfile << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     // while(!fileReadCorrectStat){
@@ -217,8 +236,8 @@ int main(int argc, char** argv)
             //     logfile << strerror(errno);
             // }
             // close(fd);
-            bool headniWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
-            bool headniReadCorrectStat = readStatus(fd, 1);
+            (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
+            bool headniReadCorrectStat = readStatus(myfifo, 1);
             cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             logfile << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             continue;
@@ -240,8 +259,8 @@ int main(int argc, char** argv)
         //   exit(EXIT_FAILURE);
         // }
           auto headz_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-        // cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
-        // logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+        cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+        logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
 	      // int hz_succ = write(fd, &delim_char, sizeof(delim_char));
         //if (hz_succ < 0){
         //    cout << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ WRITE head FAILED $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" << endl;
@@ -250,8 +269,8 @@ int main(int argc, char** argv)
         //    logfile << strerror(errno);
         //}
         //close(fd);
-        bool headzWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
-        bool headzReadCorrectStat = readStatus(fd, 1);
+        (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
+        bool headzReadCorrectStat = readStatus(myfifo, 1);
         cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
         logfile << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
 	      continue;
@@ -281,8 +300,8 @@ int main(int argc, char** argv)
       //}
       //close(fd);
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
-      bool headWriteStat = writeStatus(fd, &delim_char, sizeof(delim_char));
-      bool headReadCorrectStat = readStatus(fd, 1);
+      (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
+      bool headReadCorrectStat = readStatus(myfifo, 1);
       cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       logfile << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       auto iterm=1;
@@ -318,8 +337,8 @@ int main(int argc, char** argv)
       // }
 	  //write(fd, box, sizeof(box));
       // close(fd);
-      bool bboxWriteStat = writeStatus(fd, box, sizeof(item));
-      bool bboxReadCorrectStat = readStatus(fd, 1);
+      (void)writeStatus(myfifo, box, sizeof(item));
+      bool bboxReadCorrectStat = readStatus(myfifo, 1);
       cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
       logfile << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
 
