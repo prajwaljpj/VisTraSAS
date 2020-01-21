@@ -29,6 +29,7 @@ bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
   }
+  close(statusVal);
   success=true;
   return success;
 }
@@ -47,6 +48,7 @@ bool writeStatus(const char* statFifo, unsigned char* writeData, size_t dataSize
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
   }
+  close(statusVal);
   success=true;
   return success;
 }
@@ -55,22 +57,24 @@ bool writeStatus(const char* statFifo, unsigned char* writeData, size_t dataSize
 bool readStatus(const char* statFifo, size_t readSize){
   int statusVal;
   bool success=false;
-  const char* readData[readSize];
+  unsigned char readData;
+  cout << "C++ LOGS ## length of readData[readSize] = " << sizeof(readData) << endl;
   statusVal = open(statFifo, O_RDONLY);
   if(statusVal==-1){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initRd = read(statusVal, readData, readSize);
+  int initRd = read(statusVal, &readData, readSize);
   if (initRd==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
   }
+  close(statusVal);
   cout << "C++ LOG ## readData = " << readData << endl;
-  cout << "C++ LOG ## (int)readData = " << (int)**readData << endl;
-  if((int)**readData==1)
+  // cout << "C++ LOG ## readData = " << (int)*readData << endl;
+  if(readData=='1')
     success=true;
-  else if ((int)**readData==0)
+  else if (readData=='0')
     success=false;
   else {
     cout << "CRITICAL ERROR:: READ DATA NON BINARY" << endl;
@@ -183,6 +187,7 @@ int main(int argc, char** argv)
     bool fileReadCorrectStat = readStatus(myfifo, 1);
     cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     logfile << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
+    if (!fileReadCorrectStat) exit(EXIT_FAILURE);
     // while(!fileReadCorrectStat){
     //   fileWriteStat = writeStatus(fd, lat_fil_cstr, strlen(lat_fil_cstr));
     //   fileReadCorrectStat = readStatus(fd, 1);
@@ -240,6 +245,7 @@ int main(int argc, char** argv)
             bool headniReadCorrectStat = readStatus(myfifo, 1);
             cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             logfile << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
+            if (!headniReadCorrectStat) exit(EXIT_FAILURE);
             continue;
       }
       frame.release();
@@ -273,6 +279,7 @@ int main(int argc, char** argv)
         bool headzReadCorrectStat = readStatus(myfifo, 1);
         cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
         logfile << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
+        if (!headzReadCorrectStat) exit(EXIT_FAILURE);
 	      continue;
 	    }
       char delim_char = (unsigned char) op1.size();
@@ -304,6 +311,7 @@ int main(int argc, char** argv)
       bool headReadCorrectStat = readStatus(myfifo, 1);
       cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       logfile << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
+      if (!headReadCorrectStat) exit(EXIT_FAILURE);
       auto iterm=1;
       for(const auto& item : op1)  
         {
@@ -341,6 +349,7 @@ int main(int argc, char** argv)
       bool bboxReadCorrectStat = readStatus(myfifo, 1);
       cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
       logfile << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
+      if (!bboxReadCorrectStat) exit(EXIT_FAILURE);
 
 	}
       auto stop = chrono::high_resolution_clock::now();

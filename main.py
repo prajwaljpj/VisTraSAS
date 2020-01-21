@@ -81,6 +81,23 @@ class Analytics(object):
 #        popened.close()
         # os.close(popened)
         # return pdat
+        #
+    # TODO add logfile as a class object
+    def write_status(self, success, logfile):
+        fifo_pipe = os.open(self.pipe_path, os.O_WRONLY)
+        if success:
+            byte_size = os.write(fifo_pipe, b'1')
+            print("Written success at {}\n".format(time.time()*1000))
+            logfile.write("Written success at {}\n".format(time.time()*1000))
+        elif not success:
+            byte_size = os.write(fifo_pipe, b'0')
+            print("Written success at {}\n".format(time.time()*1000))
+            logfile.write("Written success at {}\n".format(time.time()*1000))
+        else:
+            print("PYTHON LOG ## exited in write_status")
+            os.close(fifo_pipe)
+            sys.exit(0)
+        os.close(fifo_pipe)
 
     def run_analytics(self):
         # counter = counts(self.line_coordinates)
@@ -148,7 +165,9 @@ class Analytics(object):
 
             if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized:: The file required is: ", lat_file_path)
+                self.write_status(False, logfile)
                 sys.exit(0)
+            self.write_status(True, logfile)
             cap = cv2.VideoCapture(lat_file_path)
 
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -190,11 +209,16 @@ class Analytics(object):
                 logfile.write("head of frame :: {}\n".format(head))
                 print("FRAME NUMBER == ", frame_number)
                 logfile.write("FRAME NUMBER == {}\n".format(frame_number))
-                if frame_number <= 20:
-                    cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
-                frame_number += 1
+                # if frame_number <= 20:
+                #     cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
+                # frame_number += 1
                 if head == 0:
                     continue
+                elif ((head < 0) or (head > 99)):
+                    print("PYTHON LOGS ## Weird head")
+                    self.write_status(False, logfile)
+                    sys.exit()
+                self.write_status(True, logfile)
 
                 detections = []
 
@@ -213,9 +237,18 @@ class Analytics(object):
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:
-                        print("Check: ",err)
+                        print("ERROR: @@Struct couldnt be unpacked@@ ",err)
                         logfile.write("ERROR: @@Struct couldnt be unpacked@@")
+                        self.write_status(False, logfile)
+                        sys.exit(0)
+
                     logfile.write("bbox data recieved :: {}\n".format(data))
+                    if not (0 < data[-1] <= 1):
+                        print("PYTHON LOG ## DATA[-1] = ", data[-1])
+                        self.write_status(False, logfile)
+                        print("PYTHON LOG ## Something is wrong with the BBox Value")
+                        sys.exit(0)
+                    self.write_status(True, logfile)
 
                     detections.append(Box(data))
                     # detections.append(Box(new_data))
