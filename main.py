@@ -120,6 +120,7 @@ class Analytics(object):
             # TODO add speed module later
             # speeder = VehicleSpeed(self.camera_intrinsics)
             frame_number = 1
+            empty_frame_counter = 0
             # latest_video = self.get_video_to_process()
             # self.check_and_delete()
             #fifo_pipe = self.getboxval()
@@ -165,13 +166,26 @@ class Analytics(object):
 
             if not os.path.exists(lat_file_path):
                 print("The file has dissappeared in python, desynchronized:: The file required is: ", lat_file_path)
-                self.write_status(False, logfile)
-                sys.exit(0)
+                # print("Waiting for correct file.\r")
+                # print("Waiting for correct file..\r")
+                # print("Waiting for correct file...\r")
+                sys.exit()
+
+                # TODO Make the change in the c++ side
+                # while(os.path.exists(lat_file_path)==False):
+                #     self.write_status(False, logfile)
+                #     fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
+                #     lat_file = os.read(fifo_pipe, 28)
+                #     print("Read file name at {}\n".format(current_time))
+                #     logfile.write("Read file name at {}\n".format(current_time))
+                #     os.close(fifo_pipe)
+                #     lat_file_path = os.path.join("./segments", self.segment_path, lat_file)
+
             self.write_status(True, logfile)
             cap = cv2.VideoCapture(lat_file_path)
 
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            while (cap.isOpened()):
+            while (1):
                 frame_time = time.time()
                 ret, frame = cap.read()
                 print("return value ---- ", ret)
@@ -180,6 +194,10 @@ class Analytics(object):
                 if frame is None:
                     print("Frame is None; for :: ", frame_number)
                     logfile.write("Frame is None; for :: {}\n".format(frame_number))
+                    empty_frame_counter += 1
+#                    if empty_frame_counter == 10:
+#                        break
+#                    continue
                     break
 
                 # print("frame_shape value ---- ", frame.shape)
@@ -211,7 +229,7 @@ class Analytics(object):
                 logfile.write("FRAME NUMBER == {}\n".format(frame_number))
                 # if frame_number <= 20:
                 #     cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
-                # frame_number += 1
+                frame_number += 1
                 if head == 0:
                     continue
                 elif ((head < 0) or (head > 99)):

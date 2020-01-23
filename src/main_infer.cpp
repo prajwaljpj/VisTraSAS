@@ -54,7 +54,7 @@ bool writeStatus(const char* statFifo, unsigned char* writeData, size_t dataSize
 }
 
 // TODO Remove exit failures
-bool readStatus(const char* statFifo, size_t readSize){
+bool readStatus(const char* statFifo){
   int statusVal;
   bool success=false;
   unsigned char readData;
@@ -64,7 +64,7 @@ bool readStatus(const char* statFifo, size_t readSize){
     cerr << "Failed to establish Pipe connection" << endl;
     exit(EXIT_FAILURE);
   }
-  int initRd = read(statusVal, &readData, readSize);
+  int initRd = read(statusVal, &readData, 1);
   if (initRd==-1){
     cerr << "failed to read Pipe Value" << endl;
     exit(EXIT_FAILURE);
@@ -153,13 +153,7 @@ int main(int argc, char** argv)
         logfile << "files are not the same, previous file is diff from lat_file" << endl;
         previous_file = lat_file_name;
     }
-    cv::VideoCapture cap(lat_file_path);
-    //cout << "videocap success" << endl;
-    int frame_num = 0;
-    if(!cap.isOpened()){
-      //cout << "C++ side ::::::::: Error opening video stream or file" << endl;
-      continue;
-    }
+
     char* lat_fil_cstr = new char[lat_file_name.length()];
     strcpy(lat_fil_cstr, lat_file_name.c_str());
     cout << "latest file strcpy :: " << lat_fil_cstr << endl;
@@ -184,16 +178,26 @@ int main(int argc, char** argv)
     // }
     // close(fd);
     (void)writeStatus(myfifo, lat_fil_cstr, strlen(lat_fil_cstr));
-    bool fileReadCorrectStat = readStatus(myfifo, 1);
+    bool fileReadCorrectStat = readStatus(myfifo);
     cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     logfile << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
-    if (!fileReadCorrectStat) exit(EXIT_FAILURE);
+    if (!fileReadCorrectStat) {
+      exit(EXIT_FAILURE);
+    }
     // while(!fileReadCorrectStat){
     //   fileWriteStat = writeStatus(fd, lat_fil_cstr, strlen(lat_fil_cstr));
     //   fileReadCorrectStat = readStatus(fd, 1);
     // }
+    cv::VideoCapture cap(lat_file_path);
+    //cout << "videocap success" << endl;
+    int frame_num = 0;
+    if(!cap.isOpened()){
+      //cout << "C++ side ::::::::: Error opening video stream or file" << endl;
+      continue;
+    }
     delete [] lat_fil_cstr;
     auto frame_number = 1;
+    auto empty_frame_counter = 0;
     while(1){
       cout << "FRAME NUMBER C++ == " << frame_number << endl;
       logfile << "FRAME NUMBER C++ == " << frame_number << endl;
@@ -209,7 +213,12 @@ int main(int argc, char** argv)
       if (frame.empty()){
         cout << "the loop broke at frame " << frame_number-1 << endl;
         logfile << "the loop broke at frame " << frame_number-1 << endl;
-	    break;
+        empty_frame_counter++;
+//        if empty_frame_counter == 10 {
+//	        break;
+//            }
+//        continue;
+        break;
       }
       frame_num++;
       //vector<Bbox> op1 = iff.infer_single_image(frame);
@@ -242,10 +251,12 @@ int main(int argc, char** argv)
             // }
             // close(fd);
             (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
-            bool headniReadCorrectStat = readStatus(myfifo, 1);
+            bool headniReadCorrectStat = readStatus(myfifo);
             cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             logfile << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
-            if (!headniReadCorrectStat) exit(EXIT_FAILURE);
+            if (!headniReadCorrectStat) {
+              exit(EXIT_FAILURE);
+            }
             continue;
       }
       frame.release();
@@ -276,10 +287,12 @@ int main(int argc, char** argv)
         //}
         //close(fd);
         (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
-        bool headzReadCorrectStat = readStatus(myfifo, 1);
+        bool headzReadCorrectStat = readStatus(myfifo);
         cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
         logfile << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
-        if (!headzReadCorrectStat) exit(EXIT_FAILURE);
+        if (!headzReadCorrectStat) {
+          exit(EXIT_FAILURE);
+        }
 	      continue;
 	    }
       char delim_char = (unsigned char) op1.size();
@@ -308,10 +321,12 @@ int main(int argc, char** argv)
       //close(fd);
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
       (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
-      bool headReadCorrectStat = readStatus(myfifo, 1);
+      bool headReadCorrectStat = readStatus(myfifo);
       cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       logfile << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
-      if (!headReadCorrectStat) exit(EXIT_FAILURE);
+      if (!headReadCorrectStat) {
+        exit(EXIT_FAILURE);
+      }
       auto iterm=1;
       for(const auto& item : op1)  
         {
@@ -346,11 +361,12 @@ int main(int argc, char** argv)
 	  //write(fd, box, sizeof(box));
       // close(fd);
       (void)writeStatus(myfifo, box, sizeof(item));
-      bool bboxReadCorrectStat = readStatus(myfifo, 1);
+      bool bboxReadCorrectStat = readStatus(myfifo);
       cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
       logfile << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
-      if (!bboxReadCorrectStat) exit(EXIT_FAILURE);
-
+      if (!bboxReadCorrectStat) {
+        exit(EXIT_FAILURE);
+      }
 	}
       auto stop = chrono::high_resolution_clock::now();
       auto duration = chrono::duration_cast<chrono::milliseconds>(stop - start);

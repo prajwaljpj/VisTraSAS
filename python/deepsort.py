@@ -20,7 +20,8 @@ from deep_sort.tracker import Tracker
 
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 CONFIG = tf.ConfigProto()
-CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.15
+#CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.15
+CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.01
 SESSION = tf.Session(config=CONFIG)
 
 

@@ -175,6 +175,8 @@ done
 
 mkdir -p segments/$SEGMENT_PATH
 mkdir -p results/$SEGMENT_PATH
+#mkdir -p pipes/$SEGMENT_PATH
+
 # when link is provided uncomment
 ffmpeg -hide_banner -loglevel panic -i $RTSP_STRM -framerate 25 -an -vcodec copy -f segment -segment_time 30 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
 
