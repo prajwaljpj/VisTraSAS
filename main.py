@@ -141,23 +141,23 @@ class Analytics(object):
 #                head_same = 0
 #                continue
 #
-            try:
-                current_time = time.time()*1000
-                fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
-                lat_file = os.read(fifo_pipe, 28)
-                print("Read file name at {}\n".format(current_time))
-                logfile.write("Read file name at {}\n".format(current_time)) 
-                os.close(fifo_pipe)
-                # lat_file = self.read_from_pipe(28)
-                print("lat_file received Python side",lat_file)
-                logfile.write("lat_file received Python side :: {}\n".format(lat_file))
-                lat_file = lat_file.decode("utf-8")
+            # try:
+            current_time = time.time()*1000
+            fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
+            lat_file = os.read(fifo_pipe, 28)
+            print("Read file name at {}\n".format(current_time))
+            logfile.write("Read file name at {}\n".format(current_time))
+            os.close(fifo_pipe)
+            # lat_file = self.read_from_pipe(28)
+            print("lat_file received Python side",lat_file)
+            logfile.write("lat_file received Python side :: {}\n".format(lat_file))
+            lat_file = lat_file.decode("utf-8")
 
-            except IOError:
-                print("didn't get latest file")
-                continue
-            except Exception as excp:
-                print("some other error ", excp)
+            # except IOError:
+            #     print("didn't get latest file")
+            #     continue
+            # except Exception as excp:
+            #     print("some other error ", excp)
 
             #print("previous file name: {}".format(previous_file))
             print("latest file name: {}\n".format(lat_file))
@@ -184,6 +184,9 @@ class Analytics(object):
             self.write_status(True, logfile)
             cap = cv2.VideoCapture(lat_file_path)
 
+            if (not cap.isOpened()):
+                continue
+
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             while (1):
                 frame_time = time.time()
@@ -198,6 +201,8 @@ class Analytics(object):
 #                    if empty_frame_counter == 10:
 #                        break
 #                    continue
+                    print("&&&&&&&&&&&&& FRAME IS NONE BREAK")
+                    logfile.write("&&&&&&&&&&&&& FRAME IS NONE BREAK &&&&&&&&&&&&&&&&&&&")
                     break
 
                 # print("frame_shape value ---- ", frame.shape)
@@ -209,20 +214,19 @@ class Analytics(object):
                     break
                 # print("image Size :::", frame.size)
 
-                sframe = SuFrame(frame)
 
-                try:
-                    current_time = time.time()*1000
-                    fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
-                    head = os.read(fifo_pipe, 1)
-                    print("Header read at {}\n".format(current_time))
-                    logfile.write("Header read at {}\n".format(current_time)) 
-                    os.close(fifo_pipe)
+                # try:
+                current_time = time.time()*1000
+                fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
+                head = os.read(fifo_pipe, 1)
+                print("Header read at {}\n".format(current_time))
+                logfile.write("Header read at {}\n".format(current_time))
+                os.close(fifo_pipe)
                     # head = self.read_from_pipe()
                     #print("pipe read::::::::::::::::")
-                except IOError:
-                    print("didnt get HEADER for frame")
-                    continue
+                # except IOError:
+                #     print("didnt get HEADER for frame")
+                #     continue
                 head = int.from_bytes(head, "big")
                 logfile.write("head of frame :: {}\n".format(head))
                 print("FRAME NUMBER == ", frame_number)
@@ -231,10 +235,13 @@ class Analytics(object):
                 #     cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
                 frame_number += 1
                 if head == 0:
+                    self.write_status(True, logfile)
                     continue
                 elif ((head < 0) or (head > 99)):
-                    print("PYTHON LOGS ## Weird head")
+                    print("PYTHON LOGS ## Weird head, got value :: ", head)
                     self.write_status(False, logfile)
+                    print("&&&&&&&&&&&&& WEIRD HEAD LOOP SYS EXIT FOUND &&&&&&&&&&&&&&")
+                    logfile.write("&&&&&&&&&&&&&WEIRD HEAD LOOP SYS EXIT FOUND  &&&&&&&&&&&&&&&&&&&")
                     sys.exit()
                 self.write_status(True, logfile)
 
@@ -242,16 +249,16 @@ class Analytics(object):
 
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING BBOX LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 for i in range(head):
+                    current_time = time.time()*1000
+                    fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
+                    data_bytes = os.read(fifo_pipe, 24)
+                    print("BBox read at {}\n".format(current_time))
+                    logfile.write("BBox read at {}\n".format(current_time))
+                    os.close(fifo_pipe)
+                    print("BBox byte length {}\n".format(len(data_bytes)))
+                    logfile.write("BBox byte length {}\n".format(len(data_bytes)))
+                    # data_bytes = self.read_from_pipe(24)
                     try:
-                        current_time = time.time()*1000
-                        fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
-                        data_bytes = os.read(fifo_pipe, 24)
-                        print("BBox read at {}\n".format(current_time))
-                        logfile.write("BBox read at {}\n".format(current_time)) 
-                        os.close(fifo_pipe)
-                        print("BBox byte length {}\n".format(len(data_bytes)))
-                        logfile.write("BBox byte length {}\n".format(len(data_bytes))) 
-                        # data_bytes = self.read_from_pipe(24)
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:
@@ -270,6 +277,8 @@ class Analytics(object):
 
                     detections.append(Box(data))
                     # detections.append(Box(new_data))
+
+                sframe = SuFrame(frame)
                 sframe.set_dets(detections)
                 _ = DeepSort.run_deep_sort(sframe)
                 vehicle_counts = counter.get_count(sframe)

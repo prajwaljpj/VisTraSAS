@@ -203,12 +203,12 @@ fi
 
 echo $ENGINE
 
-./install/runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMENT_PATH &
+CUDA_VISIBLE_DEVICES=0 ./install/runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMENT_PATH &
 # ./runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMENT_PATH &
 
 # echo $PIPE_PATH $LINE_COORD $CAM_PARAM $Q_CONF
 
-python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH &
+CUDA_VISIBLE_DEVICES=1 python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH &
 
 # while true;
 # do sleep 5;

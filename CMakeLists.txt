@@ -21,7 +21,9 @@ set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 #add opencv
 FIND_PACKAGE(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
+# message(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARIES_DIRS})
+# message(${OpenCV_LIBRARIES_DIRS})
 
 # find and set Boost packages
 set(Boost_USE_STATIC_LIBS ON) 
@@ -56,3 +58,15 @@ add_executable(createEngine ${SOURCE_DIR}/main.cpp ${SOURCE_DIR}/inference.cpp $
 target_link_libraries(createEngine TrtNet ${OpenCV_LIBS})
 
 install(TARGETS createEngine DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/)
+
+# this is purely for testing (getting second latest file)
+
+add_executable(getSecondLatest ${SOURCE_DIR}/main_gl.cpp ${SOURCE_DIR}/inference.cpp ${SOURCE_DIR}/eval.cpp ${SOURCE_DIR}/dataReader.cpp ${SOURCE_DIR}/get_latest.cpp)
+target_link_libraries(getSecondLatest TrtNet ${OpenCV_LIBS})
+# link boost libraries
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    target_link_libraries(getSecondLatest ${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+endif()
+
+install(TARGETS getSecondLatest DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/install/)

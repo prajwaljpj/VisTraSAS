@@ -19,9 +19,10 @@ from tools import generate_detections
 from deep_sort.tracker import Tracker
 
 os.environ['KERAS_BACKEND'] = 'tensorflow'
-CONFIG = tf.ConfigProto()
-#CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.15
-CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.01
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
+CONFIG = tf.ConfigProto(device_count = {'GPU': 0})
+CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.5
+#CONFIG.gpu_options.per_process_gpu_memory_fraction = 0.003
 SESSION = tf.Session(config=CONFIG)
 
 

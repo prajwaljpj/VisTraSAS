@@ -205,11 +205,11 @@ int main(int argc, char** argv)
       auto start = chrono::high_resolution_clock::now();
       cv::Mat frame;
       cap >> frame;
-      if (frame_number-1 <= 20) {
-          std::ostringstream name;
-          name << "~/home/rbccps/saved_frames/cpp_frame_" << frame_number-1<<".jpg";
-      cv::imwrite(name.str(), frame);
-      }
+      // if (frame_number-1 <= 20) {
+      //     std::ostringstream name;
+      //     name << "~/home/rbccps/saved_frames/cpp_frame_" << frame_number-1<<".jpg";
+      // cv::imwrite(name.str(), frame);
+      // }
       if (frame.empty()){
         cout << "the loop broke at frame " << frame_number-1 << endl;
         logfile << "the loop broke at frame " << frame_number-1 << endl;

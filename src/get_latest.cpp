@@ -25,6 +25,44 @@ fs::path latestFile(std::string dirPath){
   }
 }
 
+fs::path secondLatestFile(std::string dirPath){
+
+  fs::path latest;
+  std::time_t latest_tm {};
+  std::vector<fs::path> fVector;
+
+  for (auto&& entry : boost::make_iterator_range(fs::directory_iterator(dirPath), {})) {
+    fs::path p = entry.path();
+    if (is_regular_file(p) && p.extension() == ".flv")
+      {
+        std::time_t timestamp = fs::last_write_time(p);
+        if (timestamp > latest_tm) {
+          latest = p;
+          latest_tm = timestamp;
+          fVector.push_back(p);
+        }
+      }
+  }
+  for (std::vector<fs::path>::iterator it = fVector.begin(); it!=fVector.end(); ++it) {
+    std::cout << *it << std::endl;
+  }
+        if (latest.empty()){
+          std::cout << "Nothing found\n";
+          return latest;
+        }
+        else if (fVector.size()==1){
+          std::cout << "Vector size 1\n";
+          fs::path empty_path;
+          return empty_path;
+        }
+        else{
+          //std::cout << "Last modified: " << latest << "\n";
+          std::cout << "returning 2nd last element\n";
+          return fVector.end()[-2];
+        }
+}
+
+
 void check_and_delete(std::string dirPath)
 {
   typedef std::multimap<std::time_t, fs::path, std::greater <std::time_t>> result_set_t;
