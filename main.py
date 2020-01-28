@@ -102,7 +102,7 @@ class Analytics(object):
     def run_analytics(self):
         # counter = counts(self.line_coordinates)
         # fifo_pipe = self.getboxval()
-        logfile = open("logs/pylogfile.log", "w+")
+        logfile = open("logs/pylogfile_"+self.pipe_path.split("/")[-1]+".log", "w+")
         self.getboxval()
         # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''

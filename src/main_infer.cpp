@@ -15,6 +15,20 @@
 
 using namespace std;
 
+
+void tokenize(string const &str, const char delim,
+              vector<string> &out)
+{
+	size_t start;
+	size_t end = 0;
+
+  while ((start = str.find_first_not_of(delim, end)) != string::npos)
+  {
+    end = str.find(delim, start);
+    out.push_back(str.substr(start, end - start));
+	}
+}
+
 // TODO Remove exit failures
 bool writeStatus(const char* statFifo, const char* writeData, size_t dataSize){
   int statusVal;
@@ -86,7 +100,7 @@ bool readStatus(const char* statFifo){
 int main(int argc, char** argv)
 { 
   ofstream logfile;
-  logfile.open("logfile.log");
+  // logfile.open("logfile"+named_pipe+".log");
   if (argc < 4)
     return -1;
   string enginename = argv[1];
@@ -102,6 +116,10 @@ int main(int argc, char** argv)
   }
   
   string named_pipe = argv[2];
+  // vector<string> named_pipe_split;
+  // tokenize(named_pipe, '/', named_pipe_split);
+  // logfile.open("logfile_"+named_pipe_split[-1]+".log");
+  logfile.open("logfile.log");
   if (named_pipe.empty())
     {
       cerr << "Invalid PIPE Name" << endl;
@@ -134,7 +152,8 @@ int main(int argc, char** argv)
   string previous_file;
 
   while (1) {
-    fs::path latest_file = latestFile(dir_path);
+    // fs::path latest_file = latestFile(dir_path);
+    fs::path latest_file = secondLatestFile(dir_path);
     if (latest_file.empty())
       {
         //cerr << "Waiting for initial files" << endl;
