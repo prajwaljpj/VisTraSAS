@@ -102,12 +102,12 @@ class Analytics(object):
     def run_analytics(self):
         # counter = counts(self.line_coordinates)
         # fifo_pipe = self.getboxval()
-        logfile = open("logs/pylogfile_"+self.pipe_path.split("/")[-1]+".log", "w+")
         self.getboxval()
         # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING MAIN LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         while(True):
+            logfile = open("logs/pylogfile_"+self.pipe_path.split("/")[-1]+".log", "w+")
             # print("inside run_analytics")
             DeepSort = deepsort_tracker()
 
@@ -289,7 +289,7 @@ class Analytics(object):
                 frame_duration = time.time() - frame_time
                 #print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
             cap.release()
-        logfile.close()
+            logfile.close()
 
 
 def is_valid_file(agparser, ags):
