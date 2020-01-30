@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <vector>
 #include <thread>
 #include <chrono>
 #include <errno.h>
@@ -16,7 +17,7 @@
 using namespace std;
 
 
-void tokenize(string const &str, const char delim,
+void tokenize(string &str, const char delim,
               vector<string> &out)
 {
 	size_t start;
@@ -72,7 +73,7 @@ bool readStatus(const char* statFifo){
   int statusVal;
   bool success=false;
   unsigned char readData;
-  cout << "C++ LOGS ## length of readData[readSize] = " << sizeof(readData) << endl;
+  // cout << "C++ LOGS ## length of readData[readSize] = " << sizeof(readData) << endl;
   statusVal = open(statFifo, O_RDONLY);
   if(statusVal==-1){
     cerr << "Failed to establish Pipe connection" << endl;
@@ -84,14 +85,14 @@ bool readStatus(const char* statFifo){
     exit(EXIT_FAILURE);
   }
   close(statusVal);
-  cout << "C++ LOG ## readData = " << readData << endl;
+  // cout << "C++ LOG ## readData = " << readData << endl;
   // cout << "C++ LOG ## readData = " << (int)*readData << endl;
   if(readData=='1')
     success=true;
   else if (readData=='0')
     success=false;
   else {
-    cout << "CRITICAL ERROR:: READ DATA NON BINARY" << endl;
+    // cout << "CRITICAL ERROR:: READ DATA NON BINARY" << endl;
     exit(EXIT_FAILURE);
     }
   return success;
@@ -116,10 +117,10 @@ int main(int argc, char** argv)
   }
   
   string named_pipe = argv[2];
-  // vector<string> named_pipe_split;
-  // tokenize(named_pipe, '/', named_pipe_split);
-  // logfile.open("logfile_"+named_pipe_split[-1]+".log");
-  logfile.open("logfile.log");
+  vector<string> named_pipe_split;
+  tokenize(named_pipe, '/', named_pipe_split);
+  logfile.open("logs/clogfile_"+named_pipe_split.end()[-1]+".log");
+  // logfile.open("logfile.log");
   if (named_pipe.empty())
     {
       cerr << "Invalid PIPE Name" << endl;
@@ -134,7 +135,7 @@ int main(int argc, char** argv)
   const char* myfifo = named_pipe.c_str();
   // const char* myfifo_rev = sig_pipe.c_str();
   chrono::time_point<chrono::high_resolution_clock> timenow = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-  cout << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
+  // cout << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
   logfile << "Created FIFO at " << timenow.time_since_epoch().count() << endl;
   mkfifo(myfifo, 0666);
   // fd = open(myfifo, O_WRONLY);
@@ -168,16 +169,16 @@ int main(int argc, char** argv)
        continue;
     }
     else{
-        cout << "files are not the same, previous file is diff from lat_file" << endl;
+        // cout << "files are not the same, previous file is diff from lat_file" << endl;
         logfile << "files are not the same, previous file is diff from lat_file" << endl;
         previous_file = lat_file_name;
     }
 
     char* lat_fil_cstr = new char[lat_file_name.length()];
     strcpy(lat_fil_cstr, lat_file_name.c_str());
-    cout << "latest file strcpy :: " << lat_fil_cstr << endl;
+    // cout << "latest file strcpy :: " << lat_fil_cstr << endl;
     logfile << "latest file strcpy :: " << lat_fil_cstr << endl;
-    cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
+    // cout << "latest file len :: " << strlen(lat_fil_cstr) << endl;
     logfile << "latest file len :: " << strlen(lat_fil_cstr) << endl;
     // changes made by prajwal
     // fd = open(myfifo, O_WRONLY);
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
     //   exit(EXIT_FAILURE);
     // }
     auto filename_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-    cout << "Writing File at " << filename_time.time_since_epoch().count() << endl;
+    // cout << "Writing File at " << filename_time.time_since_epoch().count() << endl;
     logfile << "Writing File at " << filename_time.time_since_epoch().count() << endl;
     // int w_success = write(fd, lat_fil_cstr, strlen(lat_fil_cstr));
     // if (w_success < 0){
@@ -198,7 +199,7 @@ int main(int argc, char** argv)
     // close(fd);
     (void)writeStatus(myfifo, lat_fil_cstr, strlen(lat_fil_cstr));
     bool fileReadCorrectStat = readStatus(myfifo);
-    cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
+    // cout << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     logfile << "CPP LOG ## File read status ::::" << fileReadCorrectStat << endl;
     if (!fileReadCorrectStat) {
       exit(EXIT_FAILURE);
@@ -218,7 +219,7 @@ int main(int argc, char** argv)
     auto frame_number = 1;
     auto empty_frame_counter = 0;
     while(1){
-      cout << "FRAME NUMBER C++ == " << frame_number << endl;
+      // cout << "FRAME NUMBER C++ == " << frame_number << endl;
       logfile << "FRAME NUMBER C++ == " << frame_number << endl;
       frame_number++;
       auto start = chrono::high_resolution_clock::now();
@@ -230,7 +231,7 @@ int main(int argc, char** argv)
       // cv::imwrite(name.str(), frame);
       // }
       if (frame.empty()){
-        cout << "the loop broke at frame " << frame_number-1 << endl;
+        // cout << "the loop broke at frame " << frame_number-1 << endl;
         logfile << "the loop broke at frame " << frame_number-1 << endl;
         empty_frame_counter++;
 //        if empty_frame_counter == 10 {
@@ -249,9 +250,9 @@ int main(int argc, char** argv)
       catch (exception &e)
       {
             char delim_char = (unsigned char) 0;
-            cout << "delim :: number :: " << op1.size() << endl;
+            // cout << "delim :: number :: " << op1.size() << endl;
             logfile << "delim :: number :: " << op1.size() << endl;
-            cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+            // cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
             // fd = open(myfifo, O_WRONLY);
             // if (fd==-1) {
@@ -259,7 +260,7 @@ int main(int argc, char** argv)
             //   exit(EXIT_FAILURE);
             // }
             auto headni_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-            cout << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
+            // cout << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
             logfile << "Header when no infer written at " << headni_time.time_since_epoch().count() << endl;
             // int headni_succ = write(fd, &delim_char, sizeof(delim_char));
             // if (headni_succ < 0){
@@ -271,7 +272,7 @@ int main(int argc, char** argv)
             // close(fd);
             (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
             bool headniReadCorrectStat = readStatus(myfifo);
-            cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
+            // cout << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             logfile << "CPP LOG ## Header no infer read status ::::" << headniReadCorrectStat << endl;
             if (!headniReadCorrectStat) {
               exit(EXIT_FAILURE);
@@ -283,11 +284,11 @@ int main(int argc, char** argv)
       if (op1.empty())
 	    {
 	      char delim_char = (unsigned char) 0;
-	      cout << "delim :: number :: " << op1.size() << endl;
+	      // cout << "delim :: number :: " << op1.size() << endl;
 	      logfile << "delim :: number :: " << op1.size() << endl;
           // cout << "delim :: VALUE ::$$$  "<< delim_char << endl;
           // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
-	      cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
+	      // cout << "delim :: sizeof :: " << sizeof(delim_char) << endl;
 	      logfile << "delim :: sizeof :: " << sizeof(delim_char) << endl;
         // fd = open(myfifo, O_WRONLY);
         // if (fd==-1) {
@@ -295,7 +296,7 @@ int main(int argc, char** argv)
         //   exit(EXIT_FAILURE);
         // }
           auto headz_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()); 
-        cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
+        // cout << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
         logfile << "Header when zero written at " << headz_time.time_since_epoch().count() << endl;
 	      // int hz_succ = write(fd, &delim_char, sizeof(delim_char));
         //if (hz_succ < 0){
@@ -307,7 +308,7 @@ int main(int argc, char** argv)
         //close(fd);
         (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
         bool headzReadCorrectStat = readStatus(myfifo);
-        cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
+        // cout << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
         logfile << "CPP LOG ## Header zero read status ::::" << headzReadCorrectStat << endl;
         if (!headzReadCorrectStat) {
           exit(EXIT_FAILURE);
@@ -316,11 +317,11 @@ int main(int argc, char** argv)
 	    }
       char delim_char = (unsigned char) op1.size();
       //cout << "LOOP STARTED before write::::::::::::"<< delim_char<<endl;
-      cout << "delim :: VALUE ::$$$  "<< op1.size() << endl;
+      // cout << "delim :: VALUE ::$$$  "<< op1.size() << endl;
       logfile << "delim :: VALUE ::$$$  "<< op1.size() << endl;
       // cout << "delim :: VALUE ::$$$  "<< delim_char << endl;
       // logfile << "delim :: VALUE ::$$$  "<< delim_char << endl;
-      cout << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
+      // cout << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
       logfile << "delim :: sizeof :: "<< sizeof(delim_char) << endl;
       // fd = open(myfifo, O_WRONLY);
       // if (fd==-1) {
@@ -328,7 +329,7 @@ int main(int argc, char** argv)
       //   exit(EXIT_FAILURE);
       // }
       auto head_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now());
-      cout << "Header written at " << head_time.time_since_epoch().count() << endl;
+      // cout << "Header written at " << head_time.time_since_epoch().count() << endl;
       logfile << "Header written at " << head_time.time_since_epoch().count() << endl;
       //int head_succ = write(fd, &delim_char, sizeof(delim_char));
       //if (head_succ < 0){
@@ -341,7 +342,7 @@ int main(int argc, char** argv)
       //cout << "LOOP STARTED FRAME after write::::::::::::"<< endl;
       (void)writeStatus(myfifo, &delim_char, sizeof(delim_char));
       bool headReadCorrectStat = readStatus(myfifo);
-      cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
+      // cout << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       logfile << "CPP LOG ## Header read status ::::" << headReadCorrectStat << endl;
       if (!headReadCorrectStat) {
         exit(EXIT_FAILURE);
@@ -350,17 +351,17 @@ int main(int argc, char** argv)
       for(const auto& item : op1)  
         {
       // this_thread::sleep_for(chrono::milliseconds(100));
-      cout << "iterm ^^+++^^ :: " << iterm << endl;
+      // cout << "iterm ^^+++^^ :: " << iterm << endl;
       logfile << "iterm ^^+++^^ :: " << iterm << endl;
       iterm++;
       unsigned char* box = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(&item));
-      cout << "box size :: " << sizeof(box) << endl;
+      // cout << "box size :: " << sizeof(box) << endl;
       logfile << "box size :: " << sizeof(box) << endl;
-      cout << "item size :: " << sizeof(item) << endl;
+      // cout << "item size :: " << sizeof(item) << endl;
       logfile << "item size :: " << sizeof(item) << endl;
-      cout << "class=" << item.classId << " prob=" << item.score*100 << endl;
+      // cout << "class=" << item.classId << " prob=" << item.score*100 << endl;
       logfile << "class=" << item.classId << " prob=" << item.score*100 << endl;
-      cout << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
+      // cout << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
       logfile << "left=" << item.left << " right=" << item.right << " top=" << item.top << " bot=" << item.bot << endl;
       // fd = open(myfifo, O_WRONLY);
       // if (fd==-1) {
@@ -368,7 +369,7 @@ int main(int argc, char** argv)
       //   exit(EXIT_FAILURE);
       // }
       auto bbox_time = chrono::time_point_cast<chrono::milliseconds>(chrono::high_resolution_clock::now());
-      cout << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
+      // cout << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
       logfile << "BBOX write time at " << bbox_time.time_since_epoch().count() << endl;
       // int box_succ = write(fd, box, sizeof(item));
       // if (box_succ < 0){
@@ -381,7 +382,7 @@ int main(int argc, char** argv)
       // close(fd);
       (void)writeStatus(myfifo, box, sizeof(item));
       bool bboxReadCorrectStat = readStatus(myfifo);
-      cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
+      // cout << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
       logfile << "CPP LOG ## BBOX read status ::::" << bboxReadCorrectStat << endl;
       if (!bboxReadCorrectStat) {
         exit(EXIT_FAILURE);

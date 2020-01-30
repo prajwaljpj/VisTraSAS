@@ -44,7 +44,7 @@ class Analytics(object):
         with open(self.camera_intrinsics_file, 'r') as cif:
             self.camera_intrinsics = json.loads(cif.read())
         load_duration = time.time() - load_start
-        print("Time taken for Init side of python : ", load_duration*1000, "ms")
+        # print("Time taken for Init side of python : ", load_duration*1000, "ms")
         # Q length part
         with open(self.qlen_conf, 'r') as conf_q:
             qlc = json.loads(conf_q.read())
@@ -66,9 +66,9 @@ class Analytics(object):
         except OSError as oe:
             if oe.errno != errno.EEXIST:
                 raise
-        print("Pipe opened::::::::")
+        # print("Pipe opened::::::::")
         current_time = time.time()*1000
-        print("Time for pipe check at {}\n".format(current_time))
+        # print("Time for pipe check at {}\n".format(current_time))
         # logfile.write("Time for pipe check at {}\n".format(current_time)) 
         # fifo = os.open(self.pipe_path, os.O_RDONLY)
         # TODO add a functionality to close fifo pipe somehow
@@ -87,14 +87,14 @@ class Analytics(object):
         fifo_pipe = os.open(self.pipe_path, os.O_WRONLY)
         if success:
             byte_size = os.write(fifo_pipe, b'1')
-            print("Written success at {}\n".format(time.time()*1000))
+            # print("Written success at {}\n".format(time.time()*1000))
             logfile.write("Written success at {}\n".format(time.time()*1000))
         elif not success:
             byte_size = os.write(fifo_pipe, b'0')
-            print("Written success at {}\n".format(time.time()*1000))
+            # print("Written success at {}\n".format(time.time()*1000))
             logfile.write("Written success at {}\n".format(time.time()*1000))
         else:
-            print("PYTHON LOG ## exited in write_status")
+            # print("PYTHON LOG ## exited in write_status")
             os.close(fifo_pipe)
             sys.exit(0)
         os.close(fifo_pipe)
@@ -106,9 +106,9 @@ class Analytics(object):
         self.getboxval()
         # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING MAIN LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        # print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING MAIN LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         while(True):
-            print("inside run_analytics")
+            # print("inside run_analytics")
             DeepSort = deepsort_tracker()
 
             # print("finished deepsort tracker init")
@@ -145,11 +145,11 @@ class Analytics(object):
             current_time = time.time()*1000
             fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
             lat_file = os.read(fifo_pipe, 28)
-            print("Read file name at {}\n".format(current_time))
+            # print("Read file name at {}\n".format(current_time))
             logfile.write("Read file name at {}\n".format(current_time))
             os.close(fifo_pipe)
             # lat_file = self.read_from_pipe(28)
-            print("lat_file received Python side",lat_file)
+            # print("lat_file received Python side",lat_file)
             logfile.write("lat_file received Python side :: {}\n".format(lat_file))
             lat_file = lat_file.decode("utf-8")
 
@@ -160,12 +160,12 @@ class Analytics(object):
             #     print("some other error ", excp)
 
             #print("previous file name: {}".format(previous_file))
-            print("latest file name: {}\n".format(lat_file))
+            print("Working on File: {}\r".format(lat_file))
             logfile.write("latest file name: {}\n".format(lat_file))
             lat_file_path = os.path.join("./segments", self.segment_path, lat_file)
 
             if not os.path.exists(lat_file_path):
-                print("The file has dissappeared in python, desynchronized:: The file required is: ", lat_file_path)
+                # print("The file has dissappeared in python, desynchronized:: The file required is: ", lat_file_path)
                 # print("Waiting for correct file.\r")
                 # print("Waiting for correct file..\r")
                 # print("Waiting for correct file...\r")
@@ -187,21 +187,21 @@ class Analytics(object):
             if (not cap.isOpened()):
                 continue
 
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            # print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING FILE LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             while (1):
                 frame_time = time.time()
                 ret, frame = cap.read()
-                print("return value ---- ", ret)
+                # print("return value ---- ", ret)
                 logfile.write("return value ---- {}\n".format(ret))
 
                 if frame is None:
-                    print("Frame is None; for :: ", frame_number)
+                    # print("Frame is None; for :: ", frame_number)
                     logfile.write("Frame is None; for :: {}\n".format(frame_number))
                     empty_frame_counter += 1
 #                    if empty_frame_counter == 10:
 #                        break
 #                    continue
-                    print("&&&&&&&&&&&&& FRAME IS NONE BREAK")
+                    # print("&&&&&&&&&&&&& FRAME IS NONE BREAK")
                     logfile.write("&&&&&&&&&&&&& FRAME IS NONE BREAK &&&&&&&&&&&&&&&&&&&")
                     break
 
@@ -209,7 +209,7 @@ class Analytics(object):
                 # logfile.write("frame_shape value ---- {}\n".format(frame.shape))
 
                 if not ret:
-                    print("continuing to next iter as no frame found at:", lat_file_path)
+                    # print("continuing to next iter as no frame found at:", lat_file_path)
                     logfile.write("continuing to next iter as no frame found at: {}\n".format(lat_file_path))
                     break
                 # print("image Size :::", frame.size)
@@ -219,7 +219,7 @@ class Analytics(object):
                 current_time = time.time()*1000
                 fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                 head = os.read(fifo_pipe, 1)
-                print("Header read at {}\n".format(current_time))
+                # print("Header read at {}\n".format(current_time))
                 logfile.write("Header read at {}\n".format(current_time))
                 os.close(fifo_pipe)
                     # head = self.read_from_pipe()
@@ -229,7 +229,7 @@ class Analytics(object):
                 #     continue
                 head = int.from_bytes(head, "big")
                 logfile.write("head of frame :: {}\n".format(head))
-                print("FRAME NUMBER == ", frame_number)
+                # print("FRAME NUMBER == ", frame_number)
                 logfile.write("FRAME NUMBER == {}\n".format(frame_number))
                 # if frame_number <= 20:
                 #     cv2.imwrite('~/home/rbccps/saved_frames/pythonframe{}.jpg'.format(frame_number), frame)
@@ -238,40 +238,40 @@ class Analytics(object):
                     self.write_status(True, logfile)
                     continue
                 elif ((head < 0) or (head > 99)):
-                    print("PYTHON LOGS ## Weird head, got value :: ", head)
+                    # print("PYTHON LOGS ## Weird head, got value :: ", head)
                     self.write_status(False, logfile)
-                    print("&&&&&&&&&&&&& WEIRD HEAD LOOP SYS EXIT FOUND &&&&&&&&&&&&&&")
+                    # print("&&&&&&&&&&&&& WEIRD HEAD LOOP SYS EXIT FOUND &&&&&&&&&&&&&&")
                     logfile.write("&&&&&&&&&&&&&WEIRD HEAD LOOP SYS EXIT FOUND  &&&&&&&&&&&&&&&&&&&")
                     sys.exit()
                 self.write_status(True, logfile)
 
                 detections = []
 
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING BBOX LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                # print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING BBOX LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 for i in range(head):
                     current_time = time.time()*1000
                     fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
                     data_bytes = os.read(fifo_pipe, 24)
-                    print("BBox read at {}\n".format(current_time))
+                    # print("BBox read at {}\n".format(current_time))
                     logfile.write("BBox read at {}\n".format(current_time))
                     os.close(fifo_pipe)
-                    print("BBox byte length {}\n".format(len(data_bytes)))
+                    # print("BBox byte length {}\n".format(len(data_bytes)))
                     logfile.write("BBox byte length {}\n".format(len(data_bytes)))
                     # data_bytes = self.read_from_pipe(24)
                     try:
                         data = struct.unpack("=iiiiif", data_bytes)
                         #print("struct unpacked ::::::::::")
                     except struct.error as err:
-                        print("ERROR: @@Struct couldnt be unpacked@@ ",err)
+                        # print("ERROR: @@Struct couldnt be unpacked@@ ",err)
                         logfile.write("ERROR: @@Struct couldnt be unpacked@@")
                         self.write_status(False, logfile)
                         sys.exit(0)
 
                     logfile.write("bbox data recieved :: {}\n".format(data))
                     if not (0 < data[-1] <= 1):
-                        print("PYTHON LOG ## DATA[-1] = ", data[-1])
+                        # print("PYTHON LOG ## DATA[-1] = ", data[-1])
                         self.write_status(False, logfile)
-                        print("PYTHON LOG ## Something is wrong with the BBox Value")
+                        # print("PYTHON LOG ## Something is wrong with the BBox Value")
                         sys.exit(0)
                     self.write_status(True, logfile)
 

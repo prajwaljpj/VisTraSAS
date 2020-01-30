@@ -54,13 +54,13 @@ fs::path secondLatestFile(std::string dirPath){
   }
 
   if (fVector.empty()){
-    std::cout << "Nothing found\n";
+    // std::cout << "Nothing found\n";
     fs::path empty_path;
     return empty_path;
   }
 
   if (fVector.size()==1){
-    std::cout << "Vector size 1\n";
+    // std::cout << "Vector size 1\n";
     fs::path empty_path;
     return empty_path;
   }
