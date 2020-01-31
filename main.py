@@ -105,12 +105,12 @@ class Analytics(object):
         self.getboxval()
         # fifo_pipe = os.open(self.pipe_path, os.O_RDONLY)
         previous_file = ''
+        DeepSort = deepsort_tracker()
         # print("~~~~~~~~~~~~~~~~~~~~~~~~~~ ENTERING MAIN LOOP ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         while(True):
-            logfile = open("logs/pylogfile_"+self.pipe_path.split("/")[-1]+".log", "w+")
+            logfile = open("logs/pylogfile_"+self.pipe_path.split("/")[-1]+".log", "a+")
             # print("inside run_analytics")
-            DeepSort = deepsort_tracker()
-
+            DeepSort.reset_tracker()
             # print("finished deepsort tracker init")
             counter = counts(self.line_coordinates)
 
@@ -288,6 +288,7 @@ class Analytics(object):
                 # print("VS::", vehicle_speeds)
                 frame_duration = time.time() - frame_time
                 #print("Time taken for process of one frame python side :", frame_duration*1000, "ms")
+                del(sframe)
             cap.release()
             logfile.close()
 
