@@ -178,7 +178,19 @@ mkdir -p results/$SEGMENT_PATH
 #mkdir -p pipes/$SEGMENT_PATH
 
 # when link is provided uncomment
-ffmpeg -hide_banner -loglevel panic -i $RTSP_STRM -framerate 25 -an -vcodec copy -f segment -segment_time 300 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
+# ffmpeg -hide_banner -loglevel panic -i $RTSP_STRM -framerate 25 -an -vcodec copy -f segment -segment_time 300 -reset_timestamps 0 -strftime 1 ./segments/$SEGMENT_PATH/rtsp_%Y-%m-%d_%H-%M-%S.flv &
+
+# ./bin/check_package.sh mutt
+
+until ./bin/vid_gen.sh $RTSP_STRM $SEGMENT_PATH;
+do
+	echo "ffmpeg has failed... Restarting ffmpeg" >&2;
+	# if you want email update (requires mutt)
+	curdate=$(date)
+	echo "FFMPEG has failed for $RTSP_STRM at $curdate" | mutt -s "VisTraSAS Alert" prajwaljpj@gmail.com -i -
+	sleep 1;
+done &
+
 
 # export PYTHONPATH=${PWD}/deep_sort:$PYTHONPATH
 
@@ -189,7 +201,7 @@ INVENV=$(python -c 'import sys; print ("1" if hasattr(sys, "real_prefix") else "
 if [ $INVENV -eq 1 ]
 then echo "inside python environment"
 else
-    echo "WARNING:: outside python environment" 
+    echo "WARNING:: outside python environment"
     workon all
 fi
 
@@ -210,6 +222,8 @@ CUDA_VISIBLE_DEVICES=0 ./install/runYolov3 $ENGINE $PIPE_PATH ./segments/$SEGMEN
 
 CUDA_VISIBLE_DEVICES=1 python3 main.py --segment_path=$SEGMENT_PATH --line_coordinates=$LINE_COORD --camera_intrinsics_file=$CAM_PARAM --q_length_config=$Q_CONF $PIPE_PATH &
 
+# Clean up code
+while true; do ls ./segments/$SEGMENT_PATH -1t | tail -n +11 | xargs -d '\n' rm -f; done &
 # while true;
 # do sleep 5;
 #    FFMPEG_PROC="$(ps aux | grep  ffmpeg | grep test_cam | awk '{print $2}')"

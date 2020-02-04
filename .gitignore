@@ -38,3 +38,4 @@ configs/line_coord/*
 logs/*
 segments/*
 results/*
+/configs/ca_cert.pem

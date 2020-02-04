@@ -8,7 +8,9 @@ import json
 import sys
 import time
 import random
-# import pika
+import pika
+import ssl
+# import logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 from python.boundbox import Box
@@ -38,6 +40,8 @@ class Analytics(object):
         # self.connection = pika.BlockingConnection(pika.ConnectionParameters('video.iudx.org.in'))
         parser = configparser.ConfigParser()
         parser.read("../configs/global.cfg")
+        self.username = parser.get("Pika", "username")
+        self.password = parser.get("Pika", "password")
         with open(self.line_coordinates_path, 'r') as lcp:
             lc = json.loads(lcp.read())
         self.line_coordinates = [lc["point_1"], lc["point_2"]]
@@ -76,6 +80,15 @@ class Analytics(object):
             os.close(fifo_pipe)
             sys.exit(0)
         os.close(fifo_pipe)
+
+    def push_pika(self, vehicle_data):
+        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        credentials = pika.PlainCredentials(self.username, self.password)
+        parameters = pika.ConnectionParameters(host='video-rs.iudx.org.in', port=5671, credentials=credentials, ssl_options=pika.SSLOptions(context))
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.basic_publish(exchange=self.username+".protected", routing_key="test", body=vehicle_data)
+
 
     def run_analytics(self):
         self.getboxval()
@@ -177,7 +190,7 @@ class Analytics(object):
                 _ = DeepSort.run_deep_sort(sframe)
                 vehicle_counts = counter.get_count(sframe)
                 op_dump = os.path.join("results/", self.segment_path, lat_file.split('.')[0]+'.json')
-                with open(op_dump, 'a+') as json_file:
+                with open(op_dump, 'w+') as json_file:
                     json.dump(vehicle_counts, json_file)
                 frame_duration = time.time() - frame_time
                 del(sframe)
